@@ -128,38 +128,10 @@ const HomeSearch = () => {
     <div className="min-h-screen bg-gray-50">
       {/* Header with Search Bar */}
       <div className="bg-white shadow-sm border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
           {/* Logo/Title */}
-          <div className="text-center mb-6">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">EventUI</h1>
-            <p className="text-gray-600">Discover amazing venues and experiences</p>
-          </div>
-
-          {/* Search Bar */}
-          <div className="relative max-w-2xl mx-auto">
-            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-              <FaSearch className="h-5 w-5 text-gray-400" />
-            </div>
-            <input
-              type="text"
-              placeholder="Search restaurants, farmhouses, events..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-12 pr-4 py-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-lg"
-              onKeyPress={(e) => e.key === 'Enter' && onSearch()}
-            />
-          </div>
-
-          {/* Filter Toggle Button */}
-          <div className="flex justify-center mt-4">
-            <button
-              onClick={() => setShowFilters(!showFilters)}
-              className="flex items-center space-x-2 px-4 py-2 bg-primary-50 text-primary-700 rounded-lg hover:bg-primary-100 transition-colors"
-            >
-              <FaFilter className="h-4 w-4" />
-              <span>Filters</span>
-              <FaChevronDown className={`h-4 w-4 transition-transform ${showFilters ? 'rotate-180' : ''}`} />
-            </button>
+          <div className="text-left mb-2">
+            <h1 className="text-3xl text-gray-500">EventUI</h1>
           </div>
         </div>
       </div>
@@ -197,8 +169,7 @@ const HomeSearch = () => {
         </div>
 
         {/* Filters Section */}
-        {showFilters && (
-          <div className="bg-white rounded-2xl shadow-soft p-6 mb-8 border border-gray-100">
+        <div className="bg-white rounded-2xl shadow-soft p-6 mb-8 border border-gray-100">
             <h3 className="text-lg font-semibold text-gray-900 mb-6 flex items-center">
               <FaFilter className="mr-2" />
               Filters
@@ -274,8 +245,8 @@ const HomeSearch = () => {
               </div>
             </div>
 
-            {/* Clear Filters Button */}
-            <div className="flex justify-end mt-6">
+            {/* Action Buttons */}
+            <div className="flex justify-between items-center mt-6">
               <button
                 onClick={() => {
                   setFilters({
@@ -291,30 +262,29 @@ const HomeSearch = () => {
               >
                 Clear All Filters
               </button>
+              
+              {/* Search Button */}
+              <button
+                onClick={onSearch}
+                disabled={isSearching}
+                className="bg-primary-600 text-white px-8 py-3 rounded-xl font-semibold hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+              >
+                {isSearching ? (
+                  <>
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                    Searching...
+                  </>
+                ) : (
+                  <>
+                    <FaSearch className="mr-2" />
+                    Search Venues
+                  </>
+                )}
+              </button>
             </div>
           </div>
-        )}
 
-        {/* Search Button */}
-        <div className="text-center">
-          <button
-            onClick={onSearch}
-            disabled={isSearching}
-            className="bg-primary-600 text-white px-8 py-4 rounded-xl font-semibold text-lg hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center mx-auto"
-          >
-            {isSearching ? (
-              <>
-                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                Searching...
-              </>
-            ) : (
-              <>
-                <FaSearch className="mr-2" />
-                Search Venues
-              </>
-            )}
-          </button>
-        </div>
+
 
         {/* Quick Stats */}
         <div className="mt-12 grid grid-cols-2 md:grid-cols-4 gap-4">
