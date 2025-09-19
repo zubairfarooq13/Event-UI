@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { FaBars, FaTimes, FaUser, FaSignOutAlt, FaCalendarAlt } from 'react-icons/fa';
+import { FaBars, FaTimes, FaUser, FaSignOutAlt, FaCalendarAlt, FaCog } from 'react-icons/fa';
 
-const Header = ({ currentView, setCurrentView, user, onLogout }) => {
+const Header = ({ currentView, setCurrentView, user, onLogout, onAdminAccess }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
 
@@ -95,6 +95,17 @@ const Header = ({ currentView, setCurrentView, user, onLogout }) => {
                     >
                       <FaUser className="mr-2" />
                       Profile
+                    </button>
+                    <div className="border-t border-gray-100"></div>
+                    <button
+                      onClick={() => {
+                        if (onAdminAccess) onAdminAccess();
+                        setIsUserMenuOpen(false);
+                      }}
+                      className="flex items-center w-full px-4 py-2 text-sm text-gray-600 hover:bg-gray-50"
+                    >
+                      <FaCog className="mr-2" />
+                      Admin Portal
                     </button>
                     <button
                       onClick={handleLogout}
