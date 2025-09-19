@@ -15,6 +15,7 @@ import {
 import VendorApprovals from './VendorApprovals';
 import ManageListings from './ManageListings';
 import BookingsManagement from './BookingsManagement';
+import AdminAnalytics from './AdminAnalytics';
 
 const AdminDashboard = ({ adminUser, onLogout }) => {
   const [currentView, setCurrentView] = useState('dashboard');
@@ -248,6 +249,64 @@ const AdminDashboard = ({ adminUser, onLogout }) => {
     );
   }
 
+  // Render AdminAnalytics view
+  if (currentView === 'analytics') {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        {/* Header with Back Navigation */}
+        <header className="bg-white shadow-sm border-b border-gray-200">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex justify-between items-center h-16">
+              <div className="flex items-center gap-4">
+                <button
+                  onClick={() => setCurrentView('dashboard')}
+                  className="flex items-center gap-2 px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+                >
+                  <FaHome className="w-4 h-4" />
+                  <span className="text-sm font-medium">Back to Dashboard</span>
+                </button>
+                <div className="w-px h-6 bg-gray-300"></div>
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+                    <span className="text-white font-bold text-sm">A</span>
+                  </div>
+                  <div>
+                    <h1 className="text-xl font-bold text-gray-900">Analytics Dashboard</h1>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-4">
+                {/* User Info */}
+                <div className="flex items-center gap-3">
+                  <div className="text-right">
+                    <p className="text-sm font-medium text-gray-900">{adminUser?.name || 'Admin'}</p>
+                    <p className="text-xs text-gray-500 capitalize">{adminUser?.role?.replace('_', ' ') || 'Administrator'}</p>
+                  </div>
+                  <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                    <FaUserTie className="w-4 h-4 text-blue-600" />
+                  </div>
+                </div>
+
+                {/* Logout */}
+                <button
+                  onClick={handleLogout}
+                  className="flex items-center gap-2 px-3 py-2 text-gray-700 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                >
+                  <FaSignOutAlt className="w-4 h-4" />
+                  <span className="text-sm font-medium">Logout</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        {/* AdminAnalytics Component */}
+        <AdminAnalytics />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -426,11 +485,14 @@ const AdminDashboard = ({ adminUser, onLogout }) => {
             </div>
             <div className="p-6">
               <div className="grid grid-cols-2 gap-4">
-                <button className="flex flex-col items-center gap-3 p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                <button 
+                  onClick={() => handleNavigation('analytics')}
+                  className="flex flex-col items-center gap-3 p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                >
                   <div className="p-3 bg-blue-100 rounded-lg">
-                    <FaUsers className="w-6 h-6 text-blue-600" />
+                    <FaChartLine className="w-6 h-6 text-blue-600" />
                   </div>
-                  <span className="text-sm font-medium text-gray-900">Manage Users</span>
+                  <span className="text-sm font-medium text-gray-900">Analytics</span>
                 </button>
 
                 <button 
