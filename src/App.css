@@ -1,0 +1,33 @@
+/* App.css - Additional custom styles if needed */
+
+.App {
+  text-align: center;
+}
+
+/* Override any default styles */
+* {
+  box-sizing: border-box;
+}
+
+/* Ensure full height for proper centering */
+html, body, #root, .App {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+/* Custom animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
