@@ -7,7 +7,7 @@ const Header = ({ currentView, setCurrentView, user, onLogout }) => {
 
   const navigationItems = [
     { key: 'home', label: 'Home', icon: '🏠' },
-    { key: 'detail', label: 'Events', icon: '📅' },
+    { key: 'listings', label: 'Venues', icon: '🏢' },
     { key: 'booking', label: 'Bookings', icon: '🎫' },
     { key: 'profile', label: 'Profile', icon: '👤' }
   ];

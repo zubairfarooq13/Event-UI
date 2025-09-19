@@ -13,14 +13,6 @@ import {
   FaChevronDown
 } from 'react-icons/fa';
 
-// Dummy function as requested
-const handleSearch = (filters) => {
-  console.log('Search initiated with filters:', filters);
-  // This is where you would typically make an API call
-  // For demo purposes, we'll just log the values
-  alert(`Searching with filters: ${JSON.stringify(filters, null, 2)}`);
-};
-
 // Sample data
 const categories = [
   {
@@ -75,7 +67,7 @@ const budgetRanges = [
   { label: 'Above ₹1,00,000', value: '100000-999999' },
 ];
 
-const HomeSearch = () => {
+const HomeSearch = ({ onSearch }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
   const [filters, setFilters] = useState({
@@ -101,7 +93,7 @@ const HomeSearch = () => {
   };
 
   // Handle search submission
-  const onSearch = async () => {
+  const handleSearchSubmit = async () => {
     setIsSearching(true);
     
     const searchFilters = {
@@ -113,7 +105,15 @@ const HomeSearch = () => {
     try {
       // Simulate API call delay
       await new Promise(resolve => setTimeout(resolve, 1000));
-      handleSearch(searchFilters);
+      
+      // Navigate to listings page with search filters
+      if (onSearch) {
+        onSearch(searchFilters);
+      } else {
+        // Fallback for direct component usage
+        console.log('Search initiated with filters:', searchFilters);
+        alert(`Searching with filters: ${JSON.stringify(searchFilters, null, 2)}`);
+      }
     } catch (error) {
       console.error('Search failed:', error);
     } finally {
@@ -126,7 +126,6 @@ const HomeSearch = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Category Cards */}
         <div className="mb-8">
@@ -256,7 +255,7 @@ const HomeSearch = () => {
               
               {/* Search Button */}
               <button
-                onClick={onSearch}
+                onClick={handleSearchSubmit}
                 disabled={isSearching}
                 className="bg-primary-600 text-white px-8 py-3 rounded-xl font-semibold hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
               >
