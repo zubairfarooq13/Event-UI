@@ -20,15 +20,7 @@ const otpSchema = yup.object().shape({
     .matches(/^\d{4}$/, 'OTP must contain only numbers'),
 });
 
-// Dummy function as requested
-const handleLogin = (phone, otp) => {
-  console.log('Login successful!', { phone, otp });
-  // This is where you would typically make an API call
-  // For demo purposes, we'll just log the values
-  alert(`Login successful for ${phone} with OTP: ${otp}`);
-};
-
-const LoginSignup = () => {
+const LoginSignup = ({ onLogin }) => {
   const [step, setStep] = useState('phone'); // 'phone' or 'otp'
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
@@ -109,7 +101,15 @@ const LoginSignup = () => {
       
       // Simulate random success/failure for demo
       if (Math.random() > 0.3) {
-        handleLogin(phoneNumber, data.otp);
+        // Create user data object
+        const userData = {
+          phone: phoneNumber,
+          loginTime: new Date().toISOString()
+        };
+        
+        // Call the onLogin callback to update authentication state
+        onLogin(userData);
+        
         // Reset form after successful login
         setStep('phone');
         setOtpValues(['', '', '', '']);
@@ -136,7 +136,14 @@ const LoginSignup = () => {
       
       // Simulate random success/failure for demo
       if (Math.random() > 0.2) {
-        alert(`Login successful with ${provider}!`);
+        // Create user data object for social login
+        const userData = {
+          provider: provider,
+          loginTime: new Date().toISOString()
+        };
+        
+        // Call the onLogin callback to update authentication state
+        onLogin(userData);
       } else {
         throw new Error(`${provider} login failed. Please try again.`);
       }

@@ -4,75 +4,55 @@ import HomeSearch from './components/home/HomeSearch';
 import ListingDetail from './components/listing/ListingDetail';
 import BookingFlow from './components/booking/BookingFlow';
 import ProfilePage from './components/profile/ProfilePage';
+import Header from './components/common/Header';
 import './App.css';
 
 function App() {
-  const [currentView, setCurrentView] = useState('home'); // 'home', 'login', 'detail', 'booking', or 'profile'
+  const [currentView, setCurrentView] = useState('home'); // 'home', 'detail', 'booking', or 'profile'
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [user, setUser] = useState(null);
+
+  // Handle successful login
+  const handleLogin = (userData) => {
+    setIsAuthenticated(true);
+    setUser(userData);
+    setCurrentView('home'); // Redirect to home after login
+  };
+
+  // Handle logout
+  const handleLogout = () => {
+    setIsAuthenticated(false);
+    setUser(null);
+    setCurrentView('login');
+  };
+
+  // If not authenticated, show login page
+  if (!isAuthenticated) {
+    return (
+      <div className="App">
+        <LoginSignup onLogin={handleLogin} />
+      </div>
+    );
+  }
 
   return (
     <div className="App">
-      {/* Simple Navigation - only show if not in booking flow */}
-      {currentView !== 'booking' && (
-        <div className="fixed top-4 right-4 z-50 flex flex-wrap gap-2">
-          <button
-            onClick={() => setCurrentView('home')}
-            className={`px-3 py-2 rounded-lg font-medium transition-colors text-sm ${
-              currentView === 'home'
-                ? 'bg-primary-600 text-white'
-                : 'bg-white text-primary-600 hover:bg-primary-50'
-            }`}
-          >
-            Home
-          </button>
-          <button
-            onClick={() => setCurrentView('detail')}
-            className={`px-3 py-2 rounded-lg font-medium transition-colors text-sm ${
-              currentView === 'detail'
-                ? 'bg-primary-600 text-white'
-                : 'bg-white text-primary-600 hover:bg-primary-50'
-            }`}
-          >
-            Detail
-          </button>
-          <button
-            onClick={() => setCurrentView('booking')}
-            className={`px-3 py-2 rounded-lg font-medium transition-colors text-sm ${
-              currentView === 'booking'
-                ? 'bg-primary-600 text-white'
-                : 'bg-white text-primary-600 hover:bg-primary-50'
-            }`}
-          >
-            Booking
-          </button>
-          <button
-            onClick={() => setCurrentView('login')}
-            className={`px-3 py-2 rounded-lg font-medium transition-colors text-sm ${
-              currentView === 'login'
-                ? 'bg-primary-600 text-white'
-                : 'bg-white text-primary-600 hover:bg-primary-50'
-            }`}
-          >
-            Login
-          </button>
-          <button
-            onClick={() => setCurrentView('profile')}
-            className={`px-3 py-2 rounded-lg font-medium transition-colors text-sm ${
-              currentView === 'profile'
-                ? 'bg-primary-600 text-white'
-                : 'bg-white text-primary-600 hover:bg-primary-50'
-            }`}
-          >
-            Profile
-          </button>
-        </div>
-      )}
+      {/* Header - show for all authenticated views */}
+      <Header
+        currentView={currentView}
+        setCurrentView={setCurrentView}
+        user={user}
+        onLogout={handleLogout}
+      />
 
-      {/* Render Current View */}
-      {currentView === 'home' && <HomeSearch />}
-      {currentView === 'detail' && <ListingDetail onBookingRequest={() => setCurrentView('booking')} />}
-      {currentView === 'booking' && <BookingFlow onBack={() => setCurrentView('detail')} />}
-      {currentView === 'login' && <LoginSignup />}
-      {currentView === 'profile' && <ProfilePage />}
+      {/* Main Content Area - add top padding to account for fixed header */}
+      <div className="main-content-area pt-16">
+        {/* Render Current View */}
+        {currentView === 'home' && <HomeSearch />}
+        {currentView === 'detail' && <ListingDetail onBookingRequest={() => setCurrentView('booking')} />}
+        {currentView === 'booking' && <BookingFlow onBack={() => setCurrentView('detail')} />}
+        {currentView === 'profile' && <ProfilePage />}
+      </div>
     </div>
   );
 }

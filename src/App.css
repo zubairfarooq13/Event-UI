@@ -1,7 +1,7 @@
 /* App.css - Additional custom styles if needed */
 
 .App {
-  text-align: center;
+  min-height: 100vh;
 }
 
 /* Override any default styles */
@@ -10,10 +10,28 @@
 }
 
 /* Ensure full height for proper centering */
-html, body, #root, .App {
+html, body, #root {
   height: 100%;
   margin: 0;
   padding: 0;
+}
+
+/* Header specific styles */
+.app-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  background: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border-bottom: 1px solid #e5e7eb;
+}
+
+/* Main content area with proper padding for fixed header */
+.main-content-area {
+  padding-top: 64px; /* Height of header */
+  min-height: 100vh;
 }
 
 /* Custom animations */
@@ -30,4 +48,33 @@ html, body, #root, .App {
 
 .fade-in {
   animation: fadeIn 0.3s ease-out;
+}
+
+/* Header navigation active state */
+.nav-active {
+  background-color: #dbeafe;
+  color: #1d4ed8;
+}
+
+/* Dropdown menu animations */
+.dropdown-enter {
+  opacity: 0;
+  transform: translateY(-10px);
+}
+
+.dropdown-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.dropdown-exit {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.dropdown-exit-active {
+  opacity: 0;
+  transform: translateY(-10px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
 }

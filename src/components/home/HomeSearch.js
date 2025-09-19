@@ -126,15 +126,6 @@ const HomeSearch = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header with Search Bar */}
-      <div className="bg-white shadow-sm border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
-          {/* Logo/Title */}
-          <div className="text-left mb-2">
-            <h1 className="text-3xl text-gray-500">EventUI</h1>
-          </div>
-        </div>
-      </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Category Cards */}

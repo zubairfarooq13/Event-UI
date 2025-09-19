@@ -42,4 +42,29 @@
   .otp-input.filled {
     @apply bg-primary-50 border-primary-500;
   }
+
+  /* Header styles */
+  .header-fixed {
+    @apply fixed top-0 left-0 right-0 z-50 bg-white shadow-md border-b border-gray-200;
+  }
+  
+  /* Main content padding to account for fixed header */
+  .main-content {
+    @apply pt-16;
+  }
+  
+  /* Ensure header appears above all content */
+  .header-z-index {
+    z-index: 9999;
+  }
+  
+  /* Smooth scrolling for navigation */
+  html {
+    scroll-behavior: smooth;
+  }
+  
+  /* Prevent body scroll when mobile menu is open */
+  .mobile-menu-open {
+    @apply overflow-hidden;
+  }
 }
