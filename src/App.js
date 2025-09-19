@@ -3,10 +3,11 @@ import LoginSignup from './components/auth/LoginSignup';
 import HomeSearch from './components/home/HomeSearch';
 import ListingDetail from './components/listing/ListingDetail';
 import BookingFlow from './components/booking/BookingFlow';
+import ProfilePage from './components/profile/ProfilePage';
 import './App.css';
 
 function App() {
-  const [currentView, setCurrentView] = useState('home'); // 'home', 'login', 'detail', or 'booking'
+  const [currentView, setCurrentView] = useState('home'); // 'home', 'login', 'detail', 'booking', or 'profile'
 
   return (
     <div className="App">
@@ -53,6 +54,16 @@ function App() {
           >
             Login
           </button>
+          <button
+            onClick={() => setCurrentView('profile')}
+            className={`px-3 py-2 rounded-lg font-medium transition-colors text-sm ${
+              currentView === 'profile'
+                ? 'bg-primary-600 text-white'
+                : 'bg-white text-primary-600 hover:bg-primary-50'
+            }`}
+          >
+            Profile
+          </button>
         </div>
       )}
 
@@ -61,6 +72,7 @@ function App() {
       {currentView === 'detail' && <ListingDetail onBookingRequest={() => setCurrentView('booking')} />}
       {currentView === 'booking' && <BookingFlow onBack={() => setCurrentView('detail')} />}
       {currentView === 'login' && <LoginSignup />}
+      {currentView === 'profile' && <ProfilePage />}
     </div>
   );
 }
