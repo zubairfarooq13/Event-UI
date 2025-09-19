@@ -5,26 +5,32 @@ import ListingDetail from './components/listing/ListingDetail';
 import ListingsPage from './components/listing/ListingsPage';
 import BookingFlow from './components/booking/BookingFlow';
 import ProfilePage from './components/profile/ProfilePage';
+import VendorDashboard from './components/vendor/VendorDashboard';
 import Header from './components/common/Header';
 import './App.css';
 
 function App() {
-  const [currentView, setCurrentView] = useState('home'); // 'home', 'listings', 'detail', 'booking', or 'profile'
+  const [currentView, setCurrentView] = useState('home'); // 'home', 'listings', 'detail', 'booking', 'profile', or 'vendor'
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState(null);
   const [selectedListingId, setSelectedListingId] = useState(null);
+  const [userType, setUserType] = useState('customer'); // 'customer' or 'vendor'
 
   // Handle successful login
   const handleLogin = (userData) => {
     setIsAuthenticated(true);
     setUser(userData);
-    setCurrentView('home'); // Redirect to home after login
+    // Check if user is vendor or customer (dummy logic for demo)
+    const isVendor = userData.phone && userData.phone.startsWith('03'); // Simple demo logic
+    setUserType(isVendor ? 'vendor' : 'customer');
+    setCurrentView(isVendor ? 'vendor' : 'home'); // Redirect based on user type
   };
 
   // Handle logout
   const handleLogout = () => {
     setIsAuthenticated(false);
     setUser(null);
+    setUserType('customer');
     setCurrentView('login');
   };
 
@@ -48,14 +54,24 @@ function App() {
     );
   }
 
+  // If user is vendor, show vendor dashboard
+  if (userType === 'vendor' && currentView === 'vendor') {
+    return (
+      <div className="App">
+        <VendorDashboard onLogout={handleLogout} />
+      </div>
+    );
+  }
+
   return (
     <div className="App">
-      {/* Header - show for all authenticated views */}
+      {/* Header - show for all authenticated customer views */}
       <Header
         currentView={currentView}
         setCurrentView={setCurrentView}
         user={user}
         onLogout={handleLogout}
+        userType={userType}
       />
 
       {/* Main Content Area - add top padding to account for fixed header */}

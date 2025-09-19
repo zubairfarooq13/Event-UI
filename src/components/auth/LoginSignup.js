@@ -9,7 +9,7 @@ const phoneSchema = yup.object().shape({
   phone: yup
     .string()
     .required('Phone number is required')
-    .matches(/^[6-9]\d{9}$/, 'Please enter a valid 10-digit phone number'),
+    .matches(/^(03\d{9}|[6-9]\d{9})$/, 'Please enter a valid phone number (Pakistani: 03xxxxxxxxx or Indian: 10-digit)'),
 });
 
 const otpSchema = yup.object().shape({
@@ -217,7 +217,7 @@ const LoginSignup = ({ onLogin }) => {
                   <input
                     {...phoneForm.register('phone')}
                     type="tel"
-                    placeholder="Enter your 10-digit phone number"
+                    placeholder="Enter phone number (03xxxxxxxxx for vendor access)"
                     className={`input-field ${phoneForm.formState.errors.phone ? 'error' : ''}`}
                     disabled={isLoading}
                   />
@@ -296,7 +296,7 @@ const LoginSignup = ({ onLogin }) => {
               <div className="space-y-3">
                 <button
                   type="submit"
-                  disabled={isLoading || !otpForm.formState.isValid}
+                  disabled={isLoading}
                   className="btn-primary flex items-center justify-center"
                 >
                   {isLoading ? (
