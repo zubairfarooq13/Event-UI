@@ -11,7 +11,7 @@ const ApiTestComponent = () => {
     
     try {
       // Test basic API connection
-      const response = await apiClient.get('/health');
+      const response = await apiClient.get('/api/health');
       setTestResults(prev => prev + `✅ API Health Check: ${response.status} ${response.statusText}\n`);
     } catch (error) {
       setTestResults(prev => prev + `❌ API Health Check Failed: ${error.message}\n`);
@@ -57,7 +57,7 @@ const ApiTestComponent = () => {
 
       <div className="mt-6 p-4 bg-blue-50 rounded">
         <h3 className="font-semibold mb-2">API Configuration:</h3>
-        <p><strong>Base URL:</strong> {process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}</p>
+        <p><strong>Base URL:</strong> {process.env.REACT_APP_API_URL || 'http://127.0.0.1:5000'}</p>
         <p><strong>Environment:</strong> {process.env.NODE_ENV}</p>
         <p><strong>Timeout:</strong> {process.env.REACT_APP_DEFAULT_TIMEOUT || '30000'}ms</p>
       </div>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import LoginSignup from './components/auth/LoginSignup';
+import AuthContainer from './components/auth/AuthContainer';
 import HomeSearch from './components/home/HomeSearch';
 import ListingDetail from './components/listing/ListingDetail';
 import ListingsPage from './components/listing/ListingsPage';
@@ -9,66 +9,72 @@ import VendorDashboard from './components/vendor/VendorDashboard';
 import AdminLogin from './components/admin/AdminLogin';
 import AdminDashboard from './components/admin/AdminDashboard';
 import Header from './components/common/Header';
-import { authService, isAuthenticated, getUserRole, getUserData, clearAuthData } from './services';
+import { UserProvider, useUser } from './contexts/UserContext';
+import { authService } from './services';
 import './App.css';
 
-function App() {
+// Inner App component that uses UserContext
+function InnerApp() {
   const [currentView, setCurrentView] = useState('home'); // 'home', 'listings', 'detail', 'booking', 'profile', 'vendor', 'admin-login', 'admin-dashboard'
-  const [isAuthenticatedState, setIsAuthenticatedState] = useState(false);
-  const [user, setUser] = useState(null);
   const [selectedListingId, setSelectedListingId] = useState(null);
-  const [userType, setUserType] = useState('customer'); // 'customer', 'vendor', or 'admin'
-  const [loading, setLoading] = useState(true);
+  const [hasInitialized, setHasInitialized] = useState(false);
 
-  // Check authentication status on component mount
+  // Debug: Log view changes
   useEffect(() => {
-    const checkAuthStatus = async () => {
-      try {
-        // Check if user is authenticated from localStorage
-        const authenticated = isAuthenticated();
-        
-        if (authenticated) {
-          const role = getUserRole();
-          const userData = getUserData();
-          
-          if (role && userData) {
-            setIsAuthenticatedState(true);
-            setUser(userData);
-            setUserType(role === 'customer' ? 'customer' : role);
-            
-            // Set appropriate view based on role
-            if (role === 'admin') {
-              setCurrentView('admin-dashboard');
-            } else if (role === 'vendor') {
-              setCurrentView('vendor');
-            } else {
-              setCurrentView('home');
-            }
-          } else {
-            // Invalid auth data, clear it
-            clearAuthData();
-            setCurrentView('login');
-          }
-        } else {
-          // Check for admin route
-          const path = window.location.pathname || window.location.hash.replace('#', '');
-          if (path === '/admin' || path.startsWith('/admin/') || path === 'admin') {
-            setCurrentView('admin-login');
-          } else {
-            setCurrentView('login');
-          }
-        }
-      } catch (error) {
-        console.error('Error checking auth status:', error);
-        clearAuthData();
-        setCurrentView('login');
-      } finally {
-        setLoading(false);
-      }
-    };
+    console.log('Current view changed to:', currentView);
+  }, [currentView]);
+  
+  // Use UserContext instead of local state
+  const { 
+    user, 
+    isAuthenticated, 
+    isLoading, 
+    login, 
+    logout, 
+    isCustomer, 
+    isVendor, 
+    isAdmin 
+  } = useUser();
 
-    checkAuthStatus();
-  }, []);
+  // Initial view setup on app load
+  useEffect(() => {
+    if (!isLoading && !hasInitialized) {
+      console.log('Initializing app view. isAuthenticated:', isAuthenticated);
+      
+      if (isAuthenticated) {
+        // Set appropriate view based on role
+        if (isAdmin()) {
+          console.log('Setting view to admin-dashboard');
+          setCurrentView('admin-dashboard');
+        } else if (isVendor()) {
+          console.log('Setting view to vendor');
+          setCurrentView('vendor');
+        } else {
+          console.log('Setting view to home');
+          setCurrentView('home');
+        }
+      } else {
+        // Check for admin route
+        const path = window.location.pathname || window.location.hash.replace('#', '');
+        if (path === '/admin' || path.startsWith('/admin/') || path === 'admin') {
+          console.log('Setting view to admin-login');
+          setCurrentView('admin-login');
+        } else {
+          console.log('Setting view to login');
+          setCurrentView('login');
+        }
+      }
+      setHasInitialized(true);
+    }
+  }, [isLoading, hasInitialized]); // Only depend on loading and initialization
+
+  // Handle logout (redirect to login when user logs out)
+  useEffect(() => {
+    if (hasInitialized && !isAuthenticated && currentView !== 'login' && currentView !== 'admin-login') {
+      console.log('User logged out, redirecting to login');
+      setCurrentView('login');
+    }
+  }, [isAuthenticated, hasInitialized, currentView]);
 
   // Handle navigation changes
   const navigateToAdmin = () => {
@@ -77,33 +83,44 @@ function App() {
   };
 
   // Handle successful login (all user types)
-  const handleLogin = (userData) => {
-    setIsAuthenticatedState(true);
-    setUser(userData.user || userData);
-    setUserType(userData.role || 'customer');
-    
-    // Redirect based on user role
-    if (userData.role === 'admin') {
-      setCurrentView('admin-dashboard');
-    } else if (userData.role === 'vendor') {
-      setCurrentView('vendor');
-    } else {
-      setCurrentView('home');
+  const handleLogin = async (userData) => {
+    try {
+      console.log('handleLogin received userData:', userData);
+      
+      // Validate userData structure
+      if (!userData || !userData.token || !userData.user) {
+        throw new Error('Invalid user data received from authentication');
+      }
+      
+      // Use the context login method
+      await login(userData.token, userData.refreshToken, userData.user);
+      
+      // Manually set the appropriate view based on user role after login
+      const userRole = userData.user.role;
+      console.log('Setting post-login view for role:', userRole);
+      
+      if (userRole === 'admin') {
+        setCurrentView('admin-dashboard');
+      } else if (userRole === 'vendor') {
+        setCurrentView('vendor');
+      } else {
+        setCurrentView('home');
+      }
+      
+    } catch (error) {
+      console.error('Login error:', error);
+      // You might want to show an error message to the user here
     }
   };
 
   // Handle logout (all user types)
   const handleLogout = async () => {
     try {
-      // Call logout service
-      await authService.logout();
+      // Use the context logout method
+      await logout();
+      setCurrentView('login');
     } catch (error) {
       console.error('Logout error:', error);
-    } finally {
-      // Clear local state
-      setIsAuthenticatedState(false);
-      setUser(null);
-      setUserType('customer');
       setCurrentView('login');
     }
   };
@@ -120,7 +137,7 @@ function App() {
   };
 
   // Show loading spinner while checking authentication
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="App flex items-center justify-center min-h-screen">
         <div className="text-center">
@@ -140,7 +157,7 @@ function App() {
     );
   }
 
-  if (currentView === 'admin-dashboard' && userType === 'admin' && isAuthenticatedState) {
+  if (currentView === 'admin-dashboard' && isAdmin() && isAuthenticated) {
     return (
       <div className="App">
         <AdminDashboard onLogout={handleLogout} adminUser={user} />
@@ -149,16 +166,16 @@ function App() {
   }
 
   // If not authenticated, show login page
-  if (!isAuthenticatedState || currentView === 'login') {
+  if (!isAuthenticated || currentView === 'login') {
     return (
       <div className="App">
-        <LoginSignup onLogin={handleLogin} />
+        <AuthContainer onLogin={handleLogin} />
       </div>
     );
   }
 
   // If user is vendor, show vendor dashboard
-  if (userType === 'vendor' && currentView === 'vendor') {
+  if (isVendor() && currentView === 'vendor') {
     return (
       <div className="App">
         <VendorDashboard onLogout={handleLogout} />
@@ -174,7 +191,7 @@ function App() {
         setCurrentView={setCurrentView}
         user={user}
         onLogout={handleLogout}
-        userType={userType}
+        userType={user?.role || 'customer'}
         onAdminAccess={navigateToAdmin}
       />
 
@@ -194,6 +211,15 @@ function App() {
         {currentView === 'profile' && <ProfilePage />}
       </div>
     </div>
+  );
+}
+
+// Main App component wrapped with UserProvider
+function App() {
+  return (
+    <UserProvider>
+      <InnerApp />
+    </UserProvider>
   );
 }
 

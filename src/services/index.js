@@ -5,8 +5,7 @@ export { default as authService } from './authService';
 // Re-export commonly used functions from apiClient
 export {
   isAuthenticated,
-  getUserRole,
-  getUserData,
-  setAuthData,
+  getAuthToken,
+  setAuthToken,
   clearAuthData
 } from './apiClient';

@@ -1,25 +1,33 @@
-import apiClient, { setAuthData, clearAuthData, getUserRole } from './apiClient';
+import apiClient, { setAuthToken, clearAuthData } from './apiClient';
 
 // Authentication service class
 class AuthService {
   // User/Customer Authentication
   async loginUser(credentials) {
     try {
-      const response = await apiClient.post('/auth/login', credentials);
-      const { token, user } = response.data;
+      const response = await apiClient.post('/api/auth/login', credentials);
       
-      // Save auth data
-      setAuthData(token, 'customer', user);
-      
-      return {
-        success: true,
-        data: { token, user, role: 'customer' },
-        message: 'Login successful'
-      };
+      // Handle the response structure from your backend
+      if (response.data && response.data.data) {
+        const { access_token, refresh_token, user } = response.data.data;
+        
+        return {
+          success: true,
+          data: { 
+            token: access_token,
+            refreshToken: refresh_token,
+            user: user,
+            role: user.role || 'customer'
+          },
+          message: response.data.message || 'Login successful'
+        };
+      } else {
+        throw new Error('Invalid response format');
+      }
     } catch (error) {
       return {
         success: false,
-        message: error.response?.data?.message || 'Login failed',
+        message: error.response?.data?.message || error.message || 'Login failed',
         error: error.response?.data?.errors || null
       };
     }
@@ -27,21 +35,29 @@ class AuthService {
 
   async signupUser(userData) {
     try {
-      const response = await apiClient.post('/auth/signup', userData);
-      const { token, user } = response.data;
+      const response = await apiClient.post('/api/auth/signup', userData);
       
-      // Save auth data
-      setAuthData(token, 'customer', user);
-      
-      return {
-        success: true,
-        data: { token, user, role: 'customer' },
-        message: 'Account created successfully'
-      };
+      // Handle the response structure from your backend
+      if (response.data && response.data.data) {
+        const { access_token, refresh_token, user } = response.data.data;
+        
+        return {
+          success: true,
+          data: { 
+            token: access_token,
+            refreshToken: refresh_token,
+            user: user,
+            role: user.role || 'customer'
+          },
+          message: response.data.message || 'Account created successfully'
+        };
+      } else {
+        throw new Error('Invalid response format');
+      }
     } catch (error) {
       return {
         success: false,
-        message: error.response?.data?.message || 'Signup failed',
+        message: error.response?.data?.message || error.message || 'Signup failed',
         error: error.response?.data?.errors || null
       };
     }
@@ -50,21 +66,29 @@ class AuthService {
   // Vendor Authentication
   async loginVendor(credentials) {
     try {
-      const response = await apiClient.post('/auth/vendor/login', credentials);
-      const { token, vendor } = response.data;
+      const response = await apiClient.post('/api/auth/vendor/login', credentials);
       
-      // Save auth data
-      setAuthData(token, 'vendor', vendor);
-      
-      return {
-        success: true,
-        data: { token, user: vendor, role: 'vendor' },
-        message: 'Login successful'
-      };
+      // Handle the response structure from your backend
+      if (response.data && response.data.data) {
+        const { access_token, refresh_token, user } = response.data.data;
+        
+        return {
+          success: true,
+          data: { 
+            token: access_token,
+            refreshToken: refresh_token,
+            user: user,
+            role: user.role || 'vendor'
+          },
+          message: response.data.message || 'Login successful'
+        };
+      } else {
+        throw new Error('Invalid response format');
+      }
     } catch (error) {
       return {
         success: false,
-        message: error.response?.data?.message || 'Login failed',
+        message: error.response?.data?.message || error.message || 'Login failed',
         error: error.response?.data?.errors || null
       };
     }
@@ -72,18 +96,29 @@ class AuthService {
 
   async signupVendor(vendorData) {
     try {
-      const response = await apiClient.post('/auth/vendor/signup', vendorData);
-      const { token, vendor } = response.data;
+      const response = await apiClient.post('/api/auth/vendor/signup', vendorData);
       
-      return {
-        success: true,
-        data: { token, user: vendor, role: 'vendor' },
-        message: 'Vendor registration successful. Please wait for approval.'
-      };
+      // Handle the response structure from your backend
+      if (response.data && response.data.data) {
+        const { access_token, refresh_token, user } = response.data.data;
+        
+        return {
+          success: true,
+          data: { 
+            token: access_token,
+            refreshToken: refresh_token,
+            user: user,
+            role: user.role || 'vendor'
+          },
+          message: response.data.message || 'Vendor registration successful. Please wait for approval.'
+        };
+      } else {
+        throw new Error('Invalid response format');
+      }
     } catch (error) {
       return {
         success: false,
-        message: error.response?.data?.message || 'Vendor signup failed',
+        message: error.response?.data?.message || error.message || 'Vendor signup failed',
         error: error.response?.data?.errors || null
       };
     }
@@ -92,21 +127,29 @@ class AuthService {
   // Admin Authentication
   async loginAdmin(credentials) {
     try {
-      const response = await apiClient.post('/auth/admin/login', credentials);
-      const { token, admin } = response.data;
+      const response = await apiClient.post('/api/auth/admin/login', credentials);
       
-      // Save auth data
-      setAuthData(token, 'admin', admin);
-      
-      return {
-        success: true,
-        data: { token, user: admin, role: 'admin' },
-        message: 'Admin login successful'
-      };
+      // Handle the response structure from your backend
+      if (response.data && response.data.data) {
+        const { access_token, refresh_token, user } = response.data.data;
+        
+        return {
+          success: true,
+          data: { 
+            token: access_token,
+            refreshToken: refresh_token,
+            user: user,
+            role: user.role || 'admin'
+          },
+          message: response.data.message || 'Admin login successful'
+        };
+      } else {
+        throw new Error('Invalid response format');
+      }
     } catch (error) {
       return {
         success: false,
-        message: error.response?.data?.message || 'Admin login failed',
+        message: error.response?.data?.message || error.message || 'Admin login failed',
         error: error.response?.data?.errors || null
       };
     }
@@ -116,7 +159,7 @@ class AuthService {
   async logout() {
     try {
       // Call backend logout endpoint (optional)
-      await apiClient.post('/auth/logout');
+      await apiClient.post('/api/auth/logout');
     } catch (error) {
       console.warn('Logout API call failed, but clearing local data anyway');
     } finally {
@@ -131,24 +174,28 @@ class AuthService {
 
   async refreshToken() {
     try {
-      const response = await apiClient.post('/auth/refresh');
-      const { token, user } = response.data;
-      const currentRole = getUserRole();
+      const response = await apiClient.post('/api/auth/refresh');
       
-      // Update auth data with new token
-      setAuthData(token, currentRole, user);
-      
-      return {
-        success: true,
-        data: { token, user },
-        message: 'Token refreshed successfully'
-      };
+      // Handle the response structure from your backend
+      if (response.data && response.data.data) {
+        const { access_token, refresh_token, user } = response.data.data;
+        
+        return {
+          success: true,
+          data: { 
+            token: access_token,
+            refreshToken: refresh_token,
+            user: user
+          },
+          message: response.data.message || 'Token refreshed successfully'
+        };
+      } else {
+        throw new Error('Invalid response format');
+      }
     } catch (error) {
-      // If refresh fails, clear auth data
-      clearAuthData();
       return {
         success: false,
-        message: 'Token refresh failed',
+        message: error.response?.data?.message || error.message || 'Token refresh failed',
         error: error.response?.data?.errors || null
       };
     }
@@ -156,7 +203,7 @@ class AuthService {
 
   async verifyToken() {
     try {
-      const response = await apiClient.get('/auth/verify');
+      const response = await apiClient.get('/api/auth/verify');
       return {
         success: true,
         data: response.data,
@@ -175,7 +222,7 @@ class AuthService {
   // Password Reset
   async forgotPassword(email) {
     try {
-      const response = await apiClient.post('/auth/forgot-password', { email });
+      const response = await apiClient.post('/api/auth/forgot-password', { email });
       return {
         success: true,
         data: response.data,
@@ -192,7 +239,7 @@ class AuthService {
 
   async resetPassword(token, newPassword) {
     try {
-      const response = await apiClient.post('/auth/reset-password', {
+      const response = await apiClient.post('/api/auth/reset-password', {
         token,
         password: newPassword
       });
@@ -211,25 +258,56 @@ class AuthService {
   }
 
   // Profile Management
-  async updateProfile(userData) {
+  async getProfile() {
     try {
-      const response = await apiClient.put('/auth/profile', userData);
-      const { user } = response.data;
-      const currentRole = getUserRole();
-      const currentToken = localStorage.getItem('authToken');
+      const response = await apiClient.get('/api/auth/profile');
       
-      // Update stored user data
-      setAuthData(currentToken, currentRole, user);
+      console.log('getProfile API response:', response.data);
       
-      return {
-        success: true,
-        data: { user },
-        message: 'Profile updated successfully'
-      };
+      // Handle the response structure from your backend
+      if (response.data && response.data.data) {
+        // The user data is directly in response.data.data
+        const userData = response.data.data;
+        
+        console.log('Extracted user data:', userData);
+        
+        return {
+          success: true,
+          data: { user: userData },
+          message: response.data.message || 'Profile retrieved successfully'
+        };
+      } else {
+        throw new Error('Invalid response format');
+      }
     } catch (error) {
       return {
         success: false,
-        message: error.response?.data?.message || 'Profile update failed',
+        message: error.response?.data?.message || error.message || 'Failed to retrieve profile',
+        error: error.response?.data?.errors || null
+      };
+    }
+  }
+
+  async updateProfile(userData) {
+    try {
+      const response = await apiClient.put('/api/auth/profile', userData);
+      
+      // Handle the response structure from your backend
+      if (response.data && response.data.data) {
+        const { user } = response.data.data;
+        
+        return {
+          success: true,
+          data: { user },
+          message: response.data.message || 'Profile updated successfully'
+        };
+      } else {
+        throw new Error('Invalid response format');
+      }
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || error.message || 'Profile update failed',
         error: error.response?.data?.errors || null
       };
     }
@@ -237,7 +315,7 @@ class AuthService {
 
   async changePassword(currentPassword, newPassword) {
     try {
-      const response = await apiClient.put('/auth/change-password', {
+      const response = await apiClient.put('/api/auth/change-password', {
         currentPassword,
         newPassword
       });
@@ -258,7 +336,7 @@ class AuthService {
   // OTP Verification
   async sendOTP(phone) {
     try {
-      const response = await apiClient.post('/auth/send-otp', { phone });
+      const response = await apiClient.post('/api/auth/send-otp', { phone });
       return {
         success: true,
         data: response.data,
@@ -275,7 +353,7 @@ class AuthService {
 
   async verifyOTP(phone, otp) {
     try {
-      const response = await apiClient.post('/auth/verify-otp', { phone, otp });
+      const response = await apiClient.post('/api/auth/verify-otp', { phone, otp });
       return {
         success: true,
         data: response.data,

@@ -13,6 +13,7 @@ const Header = ({ currentView, setCurrentView, user, onLogout, onAdminAccess }) 
   ];
 
   const handleNavigation = (view) => {
+    console.log('Header navigation called with view:', view);
     setCurrentView(view);
     setIsMobileMenuOpen(false);
   };
@@ -63,7 +64,7 @@ const Header = ({ currentView, setCurrentView, user, onLogout, onAdminAccess }) 
                   <FaUser className="w-4 h-4 text-primary-600" />
                 </div>
                 <span className="hidden lg:block">
-                  {user?.phone ? user.phone.replace(/(\d{5})(\d{5})/, '$1-$2') : 'User'}
+                  {user?.name || user?.email || (user?.phone ? user.phone.replace(/(\d{5})(\d{5})/, '$1-$2') : 'User')}
                 </span>
                 <svg
                   className={`w-4 h-4 transition-transform duration-200 ${
@@ -164,7 +165,7 @@ const Header = ({ currentView, setCurrentView, user, onLogout, onAdminAccess }) 
               </div>
               <div className="ml-3">
                 <div className="text-base font-medium text-gray-800">
-                  {user?.phone ? user.phone.replace(/(\d{5})(\d{5})/, '$1-$2') : 'User'}
+                  {user?.name || user?.email || (user?.phone ? user.phone.replace(/(\d{5})(\d{5})/, '$1-$2') : 'User')}
                 </div>
               </div>
             </div>

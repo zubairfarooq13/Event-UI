@@ -1,15 +1,84 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Card from '../common/Card';
 import Button from '../common/Button';
+import { useUser } from '../../contexts/UserContext';
+import { authService } from '../../services';
 
 const ProfilePage = () => {
+  const { user, logout: contextLogout, updateUser } = useUser();
   const [isEditing, setIsEditing] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [profileData, setProfileData] = useState({
-    name: 'John Doe',
-    email: 'john.doe@example.com',
-    phone: '+1 (555) 123-4567',
+    name: '',
+    email: '',
+    phone: '',
     avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facepad&facepad=2&w=256&h=256&q=80'
   });
+
+  // Load profile data when component mounts
+  useEffect(() => {
+    loadProfileData();
+  }, []);
+
+  const loadProfileData = async () => {
+    try {
+      setLoading(true);
+      setError('');
+      
+      // Call API to get latest profile data
+      const result = await authService.getProfile();
+      
+      console.log('Profile API result:', result);
+      
+      if (result.success && result.data.user) {
+        const userData = result.data.user;
+        console.log('User data from API:', userData);
+        
+        setProfileData({
+          name: userData.name || '',
+          email: userData.email || '',
+          phone: userData.phone || '',
+          avatar: userData.avatar || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOj EyMDd9&auto=format&fit=facepad&facepad=2&w=256&h=256&q=80'
+        });
+        
+        console.log('Profile data set:', {
+          name: userData.name || '',
+          email: userData.email || '',
+          phone: userData.phone || ''
+        });
+        
+        // Update user context with latest data
+        updateUser(userData);
+      } else {
+        // Fallback to context user data if API fails
+        if (user) {
+          setProfileData({
+            name: user.name || '',
+            email: user.email || '',
+            phone: user.phone || '',
+            avatar: user.avatar || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facepad&facepad=2&w=256&h=256&q=80'
+          });
+        }
+        setError(result.message || 'Failed to load profile data');
+      }
+    } catch (err) {
+      console.error('Error loading profile:', err);
+      setError('Failed to load profile data');
+      
+      // Fallback to context user data
+      if (user) {
+        setProfileData({
+          name: user.name || '',
+          email: user.email || '',
+          phone: user.phone || '',
+          avatar: user.avatar || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facepad&facepad=2&w=256&h=256&q=80'
+        });
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Dummy favorite vendors data
   const favoriteVendors = [
@@ -39,15 +108,44 @@ const ProfilePage = () => {
     setIsEditing(true);
   };
 
-  const handleSave = () => {
-    // Dummy function to handle profile update
-    handleProfileUpdate(profileData);
-    setIsEditing(false);
+  const handleSave = async () => {
+    try {
+      setError('');
+      
+      // Call API to update profile
+      const result = await authService.updateProfile({
+        name: profileData.name,
+        email: profileData.email
+        // Note: phone is typically not editable after registration
+      });
+      
+      if (result.success && result.data.user) {
+        // Update context with new user data
+        updateUser(result.data.user);
+        setIsEditing(false);
+        
+        // Show success message (you could add a toast notification here)
+        console.log('Profile updated successfully');
+      } else {
+        setError(result.message || 'Failed to update profile');
+      }
+    } catch (err) {
+      console.error('Error updating profile:', err);
+      setError('Failed to update profile');
+    }
   };
 
   const handleCancel = () => {
     setIsEditing(false);
-    // Reset to original data if needed
+    // Reset to current user data
+    if (user) {
+      setProfileData({
+        name: user.name || '',
+        email: user.email || '',
+        phone: user.phone || '',
+        avatar: user.avatar || profileData.avatar
+      });
+    }
   };
 
   const handleInputChange = (field, value) => {
@@ -57,16 +155,25 @@ const ProfilePage = () => {
     }));
   };
 
-  // Dummy functions as requested
-  const handleProfileUpdate = (data) => {
-    console.log('Profile update:', data);
-    // Simulate API call
+  const handleLogout = async () => {
+    try {
+      await contextLogout();
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
   };
 
-  const handleLogout = () => {
-    console.log('Logging out...');
-    // Simulate logout logic
-  };
+  // Show loading spinner while loading profile data
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-8 h-8 border-4 border-primary-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading profile...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 py-4 px-4 sm:px-6 lg:px-8">
@@ -77,6 +184,19 @@ const ProfilePage = () => {
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Profile</h1>
           <p className="text-gray-600">Manage your account settings and preferences</p>
         </div>
+
+        {/* Error Message */}
+        {error && (
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+            <p className="text-red-600 text-sm font-medium">{error}</p>
+            <button
+              onClick={loadProfileData}
+              className="mt-2 text-red-700 hover:text-red-800 text-sm underline"
+            >
+              Try again
+            </button>
+          </div>
+        )}
 
         {/* Profile Information Card */}
         <Card className="p-6">

@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // Base URL for the backend API
-const BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+const BASE_URL = process.env.REACT_APP_API_URL || 'http://127.0.0.1:5000';
 
 // Create Axios instance
 const apiClient = axios.create({
@@ -117,36 +117,25 @@ export const getAuthHeader = () => {
   return token ? { Authorization: `Bearer ${token}` } : {};
 };
 
-// Helper function to check if user is authenticated
+// Helper function to check if user is authenticated (token only)
 export const isAuthenticated = () => {
   const token = localStorage.getItem('authToken');
-  const userRole = localStorage.getItem('userRole');
-  return !!(token && userRole);
+  return !!token;
 };
 
-// Helper function to get user role
-export const getUserRole = () => {
-  return localStorage.getItem('userRole');
+// Helper function to get auth token
+export const getAuthToken = () => {
+  return localStorage.getItem('authToken');
 };
 
-// Helper function to get user data
-export const getUserData = () => {
-  const userData = localStorage.getItem('userData');
-  return userData ? JSON.parse(userData) : null;
-};
-
-// Helper function to clear auth data
+// Helper function to clear auth data (token only)
 export const clearAuthData = () => {
   localStorage.removeItem('authToken');
-  localStorage.removeItem('userRole');
-  localStorage.removeItem('userData');
 };
 
-// Helper function to set auth data
-export const setAuthData = (token, role, userData) => {
+// Helper function to set auth token
+export const setAuthToken = (token) => {
   localStorage.setItem('authToken', token);
-  localStorage.setItem('userRole', role);
-  localStorage.setItem('userData', JSON.stringify(userData));
 };
 
 export default apiClient;
