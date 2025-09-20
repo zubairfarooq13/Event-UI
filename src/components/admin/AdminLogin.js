@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { FaEye, FaEyeSlash, FaSignInAlt, FaUserShield, FaExclamationTriangle } from 'react-icons/fa';
+import { authService } from '../../services';
 
 const AdminLogin = ({ onLogin }) => {
   const [formData, setFormData] = useState({
@@ -64,36 +65,19 @@ const AdminLogin = ({ onLogin }) => {
     setError('');
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // Use auth service for admin login
+      const result = await authService.loginAdmin({
+        email: formData.email,
+        password: formData.password
+      });
 
-      // Mock admin credentials validation
-      const validAdminCredentials = [
-        { email: 'admin@eventapp.com', password: 'admin123' },
-        { email: 'super@eventapp.com', password: 'super123' },
-        { email: 'manager@eventapp.com', password: 'manager123' }
-      ];
-
-      const isValidAdmin = validAdminCredentials.some(
-        admin => admin.email === formData.email && admin.password === formData.password
-      );
-
-      if (isValidAdmin) {
-        // Successful login
-        const adminUser = {
-          email: formData.email,
-          role: formData.email.includes('super') ? 'super_admin' : 
-                formData.email.includes('manager') ? 'manager' : 'admin',
-          name: formData.email.split('@')[0].charAt(0).toUpperCase() + 
-                formData.email.split('@')[0].slice(1),
-          loginTime: new Date().toISOString()
-        };
-
+      if (result.success) {
+        // Call the onLogin callback to update authentication state
         if (onLogin) {
-          onLogin(adminUser);
+          onLogin(result.data);
         }
       } else {
-        setError('Invalid email or password. Please check your credentials and try again.');
+        setError(result.message);
       }
     } catch (err) {
       setError('Login failed. Please check your connection and try again.');

@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import { FaGoogle, FaFacebook, FaSpinner } from 'react-icons/fa';
+import { authService } from '../../services';
 
 // Validation schemas
 const phoneSchema = yup.object().shape({
@@ -48,16 +49,15 @@ const LoginSignup = ({ onLogin }) => {
     setError('');
     
     try {
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Send OTP using auth service
+      const result = await authService.sendOTP(data.phone);
       
-      // Simulate random success/failure for demo
-      if (Math.random() > 0.2) {
+      if (result.success) {
         setPhoneNumber(data.phone);
         setStep('otp');
         setResendTimer(30);
       } else {
-        throw new Error('Failed to send OTP. Please try again.');
+        throw new Error(result.message);
       }
     } catch (err) {
       setError(err.message || 'Something went wrong. Please try again.');
@@ -96,27 +96,30 @@ const LoginSignup = ({ onLogin }) => {
     setError('');
     
     try {
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // Verify OTP using auth service
+      const otpResult = await authService.verifyOTP(phoneNumber, data.otp);
       
-      // Simulate random success/failure for demo
-      if (Math.random() > 0.3) {
-        // Create user data object
-        const userData = {
+      if (otpResult.success) {
+        // After OTP verification, log in the user
+        const loginResult = await authService.loginUser({
           phone: phoneNumber,
-          loginTime: new Date().toISOString()
-        };
+          otp: data.otp
+        });
         
-        // Call the onLogin callback to update authentication state
-        onLogin(userData);
-        
-        // Reset form after successful login
-        setStep('phone');
-        setOtpValues(['', '', '', '']);
-        phoneForm.reset();
-        otpForm.reset();
+        if (loginResult.success) {
+          // Call the onLogin callback to update authentication state
+          onLogin(loginResult.data);
+          
+          // Reset form after successful login
+          setStep('phone');
+          setOtpValues(['', '', '', '']);
+          phoneForm.reset();
+          otpForm.reset();
+        } else {
+          throw new Error(loginResult.message);
+        }
       } else {
-        throw new Error('Invalid OTP. Please try again.');
+        throw new Error(otpResult.message);
       }
     } catch (err) {
       setError(err.message || 'Something went wrong. Please try again.');
@@ -131,22 +134,12 @@ const LoginSignup = ({ onLogin }) => {
     setError('');
     
     try {
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // For now, we'll show a message that social login needs backend integration
+      // In a real app, this would redirect to OAuth providers
+      setError(`${provider} login will be available once backend integration is complete.`);
       
-      // Simulate random success/failure for demo
-      if (Math.random() > 0.2) {
-        // Create user data object for social login
-        const userData = {
-          provider: provider,
-          loginTime: new Date().toISOString()
-        };
-        
-        // Call the onLogin callback to update authentication state
-        onLogin(userData);
-      } else {
-        throw new Error(`${provider} login failed. Please try again.`);
-      }
+      // Future implementation:
+      // window.location.href = `${process.env.REACT_APP_API_URL}/auth/${provider.toLowerCase()}`;
     } catch (err) {
       setError(err.message || 'Something went wrong. Please try again.');
     } finally {
@@ -171,10 +164,15 @@ const LoginSignup = ({ onLogin }) => {
     setError('');
     
     try {
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      setResendTimer(30);
-      setOtpValues(['', '', '', '']);
+      // Resend OTP using auth service
+      const result = await authService.sendOTP(phoneNumber);
+      
+      if (result.success) {
+        setResendTimer(30);
+        setOtpValues(['', '', '', '']);
+      } else {
+        throw new Error(result.message);
+      }
     } catch (err) {
       setError('Failed to resend OTP. Please try again.');
     } finally {

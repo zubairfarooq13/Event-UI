@@ -9,23 +9,65 @@ import VendorDashboard from './components/vendor/VendorDashboard';
 import AdminLogin from './components/admin/AdminLogin';
 import AdminDashboard from './components/admin/AdminDashboard';
 import Header from './components/common/Header';
+import { authService, isAuthenticated, getUserRole, getUserData, clearAuthData } from './services';
 import './App.css';
 
 function App() {
   const [currentView, setCurrentView] = useState('home'); // 'home', 'listings', 'detail', 'booking', 'profile', 'vendor', 'admin-login', 'admin-dashboard'
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false);
+  const [isAuthenticatedState, setIsAuthenticatedState] = useState(false);
   const [user, setUser] = useState(null);
-  const [adminUser, setAdminUser] = useState(null);
   const [selectedListingId, setSelectedListingId] = useState(null);
   const [userType, setUserType] = useState('customer'); // 'customer', 'vendor', or 'admin'
+  const [loading, setLoading] = useState(true);
 
-  // Check for admin route on component mount
+  // Check authentication status on component mount
   useEffect(() => {
-    const path = window.location.pathname || window.location.hash.replace('#', '');
-    if (path === '/admin' || path.startsWith('/admin/') || path === 'admin') {
-      setCurrentView('admin-login');
-    }
+    const checkAuthStatus = async () => {
+      try {
+        // Check if user is authenticated from localStorage
+        const authenticated = isAuthenticated();
+        
+        if (authenticated) {
+          const role = getUserRole();
+          const userData = getUserData();
+          
+          if (role && userData) {
+            setIsAuthenticatedState(true);
+            setUser(userData);
+            setUserType(role === 'customer' ? 'customer' : role);
+            
+            // Set appropriate view based on role
+            if (role === 'admin') {
+              setCurrentView('admin-dashboard');
+            } else if (role === 'vendor') {
+              setCurrentView('vendor');
+            } else {
+              setCurrentView('home');
+            }
+          } else {
+            // Invalid auth data, clear it
+            clearAuthData();
+            setCurrentView('login');
+          }
+        } else {
+          // Check for admin route
+          const path = window.location.pathname || window.location.hash.replace('#', '');
+          if (path === '/admin' || path.startsWith('/admin/') || path === 'admin') {
+            setCurrentView('admin-login');
+          } else {
+            setCurrentView('login');
+          }
+        }
+      } catch (error) {
+        console.error('Error checking auth status:', error);
+        clearAuthData();
+        setCurrentView('login');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    checkAuthStatus();
   }, []);
 
   // Handle navigation changes
@@ -34,38 +76,36 @@ function App() {
     window.history.pushState({}, '', '/admin');
   };
 
-  // Handle successful customer/vendor login
+  // Handle successful login (all user types)
   const handleLogin = (userData) => {
-    setIsAuthenticated(true);
-    setUser(userData);
-    // Check if user is vendor or customer (dummy logic for demo)
-    const isVendor = userData.phone && userData.phone.startsWith('03'); // Simple demo logic
-    setUserType(isVendor ? 'vendor' : 'customer');
-    setCurrentView(isVendor ? 'vendor' : 'home'); // Redirect based on user type
+    setIsAuthenticatedState(true);
+    setUser(userData.user || userData);
+    setUserType(userData.role || 'customer');
+    
+    // Redirect based on user role
+    if (userData.role === 'admin') {
+      setCurrentView('admin-dashboard');
+    } else if (userData.role === 'vendor') {
+      setCurrentView('vendor');
+    } else {
+      setCurrentView('home');
+    }
   };
 
-  // Handle successful admin login
-  const handleAdminLogin = (adminData) => {
-    setIsAdminAuthenticated(true);
-    setAdminUser(adminData);
-    setUserType('admin');
-    setCurrentView('admin-dashboard');
-  };
-
-  // Handle customer/vendor logout
-  const handleLogout = () => {
-    setIsAuthenticated(false);
-    setUser(null);
-    setUserType('customer');
-    setCurrentView('login');
-  };
-
-  // Handle admin logout
-  const handleAdminLogout = () => {
-    setIsAdminAuthenticated(false);
-    setAdminUser(null);
-    setUserType('customer');
-    setCurrentView('admin-login');
+  // Handle logout (all user types)
+  const handleLogout = async () => {
+    try {
+      // Call logout service
+      await authService.logout();
+    } catch (error) {
+      console.error('Logout error:', error);
+    } finally {
+      // Clear local state
+      setIsAuthenticatedState(false);
+      setUser(null);
+      setUserType('customer');
+      setCurrentView('login');
+    }
   };
 
   // Handle view details navigation
@@ -79,33 +119,37 @@ function App() {
     setCurrentView('listings');
   };
 
+  // Show loading spinner while checking authentication
+  if (loading) {
+    return (
+      <div className="App flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="w-8 h-8 border-4 border-primary-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
   // Handle admin routes
   if (currentView === 'admin-login') {
-    if (isAdminAuthenticated) {
-      // If already authenticated as admin, go to dashboard
-      return (
-        <div className="App">
-          <AdminDashboard onLogout={handleAdminLogout} adminUser={adminUser} />
-        </div>
-      );
-    }
     return (
       <div className="App">
-        <AdminLogin onLogin={handleAdminLogin} />
+        <AdminLogin onLogin={handleLogin} />
       </div>
     );
   }
 
-  if (currentView === 'admin-dashboard' && isAdminAuthenticated) {
+  if (currentView === 'admin-dashboard' && userType === 'admin' && isAuthenticatedState) {
     return (
       <div className="App">
-        <AdminDashboard onLogout={handleAdminLogout} adminUser={adminUser} />
+        <AdminDashboard onLogout={handleLogout} adminUser={user} />
       </div>
     );
   }
 
-  // If not authenticated (customer/vendor), show login page
-  if (!isAuthenticated) {
+  // If not authenticated, show login page
+  if (!isAuthenticatedState || currentView === 'login') {
     return (
       <div className="App">
         <LoginSignup onLogin={handleLogin} />
