@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
-import { 
-  FaChevronLeft, 
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import {
+  FaChevronLeft,
   FaChevronRight,
   FaMapMarkerAlt,
   FaUsers,
@@ -16,74 +17,90 @@ import {
   FaShare,
   FaHeart
 } from 'react-icons/fa';
+import Header from '../common/Header';
+import { venueService } from '../../services';
 
 const ListingDetail = ({ onBookingRequest }) => {
-// Sample data for the listing
-const listingData = {
-  id: 1,
-  name: "Royal Gardens Banquet Hall",
-  location: "Bandra West, Mumbai",
-  capacity: "200-500 guests",
-  rating: 4.6,
-  reviewCount: 128,
-  description: "Royal Gardens Banquet Hall is a premier event venue located in the heart of Bandra West. With its elegant interiors, state-of-the-art facilities, and exceptional service, it's the perfect choice for weddings, corporate events, and special celebrations. Our spacious halls can accommodate intimate gatherings as well as grand celebrations.",
-  amenities: [
-    { name: "Free WiFi", icon: FaWifi },
-    { name: "Parking Available", icon: FaParking },
-    { name: "Catering Service", icon: FaUtensils },
-    { name: "Sound System", icon: FaMusic },
-  ],
-  isAvailable: true,
-  vendor: {
-    name: "Elite Events & Venues",
-    phone: "+91 98765 43210",
-    email: "info@eliteevents.com",
-    experience: "15+ years"
-  }
-};
+  const { id: vendorId } = useParams();
+  const navigate = useNavigate();
+  const [listingData, setListingData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [selectedPackage, setSelectedPackage] = useState(null);
+  const [isFavorite, setIsFavorite] = useState(false);
 
-// Sample placeholder images
-const placeholderImages = [
-  "https://images.unsplash.com/photo-1519167758481-83f29da73fb2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2006&q=80",
-  "https://images.unsplash.com/photo-1511795409834-432f7b5dff70?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2069&q=80",
-  "https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2069&q=80",
-  "https://images.unsplash.com/photo-1478146896981-b80fe463b330?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
-  "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80"
-];
+  // Fetch vendor details on component mount
+  useEffect(() => {
+    const fetchVendorDetails = async () => {
+      if (!vendorId) {
+        setError('Vendor ID not found');
+        setLoading(false);
+        return;
+      }
 
-// Sample packages data
-const packages = [
-  {
-    id: 1,
-    title: "Basic Package",
-    description: "Perfect for intimate gatherings. Includes basic decoration, sound system, and seating arrangement for up to 100 guests.",
-    price: "₹25,000",
-    features: ["Basic Decoration", "Sound System", "Seating for 100", "4 Hours Duration"]
-  },
-  {
-    id: 2,
-    title: "Premium Package",
-    description: "Ideal for medium-sized events. Enhanced decoration, catering options, and extended venue access for up to 250 guests.",
-    price: "₹65,000",
-    features: ["Premium Decoration", "Catering Service", "Seating for 250", "6 Hours Duration", "Photography"]
-  },
-  {
-    id: 3,
-    title: "Luxury Package",
-    description: "The ultimate celebration experience. Full-service planning, gourmet catering, and premium amenities for up to 500 guests.",
-    price: "₹1,25,000",
-    features: ["Luxury Decoration", "Gourmet Catering", "Seating for 500", "Full Day Access", "Photography & Videography", "Event Coordinator"]
-  }
-];
+      try {
+        setLoading(true);
+        setError(null);
+
+        const result = await venueService.getVenueById(vendorId);
+
+        if (result.success) {
+          // Transform the data to match component expectations using correct backend field names
+          const vendorData = result.data.data;
+          const transformedData = {
+            id: vendorData.id,
+            name: vendorData.name,
+            location: vendorData.location,
+            city: vendorData.city,
+            capacity: vendorData.capacity,
+            description: vendorData.description,
+            photos: vendorData.photos || [],
+            rating: vendorData.rating || 4.5,
+            reviewCount: vendorData.total_reviews || 0,
+            type: vendorData.type,
+            priceRange: vendorData.price_range,
+            amenities: vendorData.amenities || [],
+            isAvailable: vendorData.is_active && vendorData.status === 'approved',
+            vendor: {
+              name: vendorData.name, // Using venue name as vendor name
+              phone: vendorData.business_phone,
+              email: vendorData.business_email,
+              experience: '5+ years' // Default since not provided
+            },
+            packages: vendorData.packages || []
+          };
+
+          setListingData(transformedData);
+        } else {
+          setError(result.error || 'Failed to load vendor details');
+        }
+      } catch (err) {
+        console.error('Error fetching vendor details:', err);
+        setError('Failed to load vendor details');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchVendorDetails();
+  }, [vendorId]);
+
+  // Handle back navigation
+  const handleBackClick = () => {
+    navigate('/venues');
+  };
 
   // Dummy function for booking request
   const handleRequestBooking = (packageId = null) => {
-    const message = packageId 
+    if (!listingData) return;
+
+    const message = packageId
       ? `Booking request for ${listingData.name} - Package ID: ${packageId}`
       : `Booking request for ${listingData.name}`;
-    
+
     console.log(message);
-    
+
     // If onBookingRequest prop is provided, call it (for navigation)
     if (onBookingRequest) {
       onBookingRequest(packageId);
@@ -91,20 +108,19 @@ const packages = [
       alert(`${message}\n\nWe'll contact you shortly to discuss your requirements!`);
     }
   };
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [selectedPackage, setSelectedPackage] = useState(null);
-  const [isFavorite, setIsFavorite] = useState(false);
 
   // Carousel navigation
   const nextImage = () => {
-    setCurrentImageIndex((prev) => 
-      prev === placeholderImages.length - 1 ? 0 : prev + 1
+    if (!listingData?.photos) return;
+    setCurrentImageIndex((prev) =>
+      prev === listingData.photos.length - 1 ? 0 : prev + 1
     );
   };
 
   const prevImage = () => {
-    setCurrentImageIndex((prev) => 
-      prev === 0 ? placeholderImages.length - 1 : prev - 1
+    if (!listingData?.photos) return;
+    setCurrentImageIndex((prev) =>
+      prev === 0 ? listingData.photos.length - 1 : prev - 1
     );
   };
 
@@ -112,18 +128,80 @@ const packages = [
     setCurrentImageIndex(index);
   };
 
+  // Loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Header />
+        <div className="flex items-center justify-center py-20">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+          <span className="ml-3 text-gray-600">Loading venue details...</span>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Header />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+          <div className="text-center">
+            <div className="text-red-500 text-6xl mb-4">⚠️</div>
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">Error Loading Venue</h2>
+            <p className="text-gray-600 mb-6">{error}</p>
+            <button
+              onClick={handleBackClick}
+              className="bg-primary-600 text-white px-6 py-3 rounded-lg hover:bg-primary-700 transition-colors"
+            >
+              Back to Venues
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // No data state
+  if (!listingData) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Header />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+          <div className="text-center">
+            <div className="text-gray-400 text-6xl mb-4">🏢</div>
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">Venue Not Found</h2>
+            <p className="text-gray-600 mb-6">The venue you're looking for doesn't exist or has been removed.</p>
+            <button
+              onClick={handleBackClick}
+              className="bg-primary-600 text-white px-6 py-3 rounded-lg hover:bg-primary-700 transition-colors"
+            >
+              Back to Venues
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 pb-20 md:pb-8">
-      {/* Header with Back Button */}
-      <div className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-40">
+      <Header />
+      
+      {/* Sub-header with Back Button */}
+      <div className="bg-white shadow-sm border-b border-gray-200 sticky top-16 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
-            <button className="flex items-center text-gray-600 hover:text-gray-900">
+            <button
+              onClick={handleBackClick}
+              className="flex items-center text-gray-600 hover:text-gray-900"
+            >
               <FaChevronLeft className="mr-2" />
               Back to Search
             </button>
             <div className="flex items-center space-x-2">
-              <button 
+              <button
                 onClick={() => setIsFavorite(!isFavorite)}
                 className={`p-2 rounded-full ${isFavorite ? 'text-red-500' : 'text-gray-400'} hover:bg-gray-100`}
               >
@@ -137,7 +215,7 @@ const packages = [
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 pt-20">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-8">
@@ -145,42 +223,50 @@ const packages = [
             <div className="bg-white rounded-2xl shadow-soft overflow-hidden">
               <div className="relative h-64 sm:h-80 md:h-96">
                 <img
-                  src={placeholderImages[currentImageIndex]}
+                  src={listingData.photos?.[currentImageIndex] || 'https://placehold.co/400x300/3B82F6/FFFFFF?text=Venue'}
                   alt={`${listingData.name}`}
                   className="w-full h-full object-cover"
                 />
-                
+
                 {/* Navigation Arrows */}
-                <button
-                  onClick={prevImage}
-                  className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 rounded-full hover:bg-opacity-70 transition-opacity"
-                >
-                  <FaChevronLeft className="h-4 w-4" />
-                </button>
-                <button
-                  onClick={nextImage}
-                  className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 rounded-full hover:bg-opacity-70 transition-opacity"
-                >
-                  <FaChevronRight className="h-4 w-4" />
-                </button>
+                {listingData.photos && listingData.photos.length > 1 && (
+                  <>
+                    <button
+                      onClick={prevImage}
+                      className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 rounded-full hover:bg-opacity-70 transition-opacity"
+                    >
+                      <FaChevronLeft className="h-4 w-4" />
+                    </button>
+                    <button
+                      onClick={nextImage}
+                      className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 rounded-full hover:bg-opacity-70 transition-opacity"
+                    >
+                      <FaChevronRight className="h-4 w-4" />
+                    </button>
+                  </>
+                )}
 
                 {/* Image Indicators */}
-                <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
-                  {placeholderImages.map((_, index) => (
-                    <button
-                      key={index}
-                      onClick={() => goToImage(index)}
-                      className={`w-3 h-3 rounded-full transition-colors ${
-                        index === currentImageIndex ? 'bg-white' : 'bg-white bg-opacity-50'
-                      }`}
-                    />
-                  ))}
-                </div>
+                {listingData.photos && listingData.photos.length > 1 && (
+                  <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
+                    {listingData.photos.map((_, index) => (
+                      <button
+                        key={index}
+                        onClick={() => goToImage(index)}
+                        className={`w-3 h-3 rounded-full transition-colors ${
+                          index === currentImageIndex ? 'bg-white' : 'bg-white bg-opacity-50'
+                        }`}
+                      />
+                    ))}
+                  </div>
+                )}
 
                 {/* Image Counter */}
-                <div className="absolute top-4 right-4 bg-black bg-opacity-50 text-white px-3 py-1 rounded-full text-sm">
-                  {currentImageIndex + 1} / {placeholderImages.length}
-                </div>
+                {listingData.photos && listingData.photos.length > 1 && (
+                  <div className="absolute top-4 right-4 bg-black bg-opacity-50 text-white px-3 py-1 rounded-full text-sm">
+                    {currentImageIndex + 1} / {listingData.photos.length}
+                  </div>
+                )}
               </div>
             </div>
 
@@ -197,7 +283,7 @@ const packages = [
                   </div>
                   <div className="flex items-center text-gray-600">
                     <FaUsers className="mr-2" />
-                    <span>{listingData.capacity}</span>
+                    <span>{listingData.capacity} guests</span>
                   </div>
                 </div>
                 <div className="mt-4 md:mt-0 text-right">
@@ -234,15 +320,30 @@ const packages = [
 
                 <h4 className="text-md font-semibold text-gray-900 mb-3">Amenities</h4>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                  {listingData.amenities.map((amenity, index) => {
-                    const IconComponent = amenity.icon;
-                    return (
+                  {listingData.amenities && listingData.amenities.length > 0 ? (
+                    listingData.amenities.map((amenity, index) => (
                       <div key={index} className="flex items-center text-sm text-gray-600">
-                        <IconComponent className="mr-2 text-primary-600" />
-                        <span>{amenity.name}</span>
+                        <FaCheckCircle className="mr-2 text-primary-600" />
+                        <span>{amenity}</span>
                       </div>
-                    );
-                  })}
+                    ))
+                  ) : (
+                    // Default amenities if none provided
+                    [
+                      { name: "Free WiFi", icon: FaWifi },
+                      { name: "Parking Available", icon: FaParking },
+                      { name: "Catering Service", icon: FaUtensils },
+                      { name: "Sound System", icon: FaMusic },
+                    ].map((amenity, index) => {
+                      const IconComponent = amenity.icon;
+                      return (
+                        <div key={index} className="flex items-center text-sm text-gray-600">
+                          <IconComponent className="mr-2 text-primary-600" />
+                          <span>{amenity.name}</span>
+                        </div>
+                      );
+                    })
+                  )}
                 </div>
               </div>
             </div>
@@ -251,50 +352,115 @@ const packages = [
             <div className="bg-white rounded-2xl shadow-soft p-6 md:p-8">
               <h2 className="text-2xl font-bold text-gray-900 mb-6">Available Packages</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                {packages.map((pkg) => (
-                  <div 
-                    key={pkg.id}
-                    className={`border-2 rounded-xl p-6 cursor-pointer transition-all duration-200 ${
-                      selectedPackage === pkg.id 
-                        ? 'border-primary-500 bg-primary-50' 
-                        : 'border-gray-200 hover:border-gray-300'
-                    }`}
-                    onClick={() => setSelectedPackage(selectedPackage === pkg.id ? null : pkg.id)}
-                  >
-                    <div className="flex justify-between items-start mb-4">
-                      <h3 className="text-lg font-semibold text-gray-900">{pkg.title}</h3>
-                      <div className="text-right">
-                        <div className="text-xl font-bold text-primary-600">{pkg.price}</div>
-                        <div className="text-sm text-gray-500">per event</div>
-                      </div>
-                    </div>
-                    <p className="text-gray-600 text-sm mb-4">{pkg.description}</p>
-                    <ul className="space-y-2">
-                      {pkg.features.map((feature, index) => (
-                        <li key={index} className="flex items-center text-sm text-gray-600">
-                          <FaCheckCircle className="text-green-500 mr-2 flex-shrink-0" />
-                          <span>{feature}</span>
-                        </li>
-                      ))}
-                    </ul>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleRequestBooking(pkg.id);
-                      }}
-                      className="w-full mt-4 bg-primary-600 text-white py-2 px-4 rounded-lg hover:bg-primary-700 transition-colors font-medium"
+                {listingData.packages && listingData.packages.length > 0 ? (
+                  listingData.packages.map((pkg) => (
+                    <div
+                      key={pkg.id}
+                      className={`border-2 rounded-xl p-6 cursor-pointer transition-all duration-200 ${
+                        selectedPackage === pkg.id
+                          ? 'border-primary-500 bg-primary-50'
+                          : 'border-gray-200 hover:border-gray-300'
+                      }`}
+                      onClick={() => setSelectedPackage(selectedPackage === pkg.id ? null : pkg.id)}
                     >
-                      Select Package
-                    </button>
-                  </div>
-                ))}
+                      <div className="flex justify-between items-start mb-4">
+                        <h3 className="text-lg font-semibold text-gray-900">{pkg.title || pkg.name}</h3>
+                        <div className="text-right">
+                          <div className="text-xl font-bold text-primary-600">{pkg.price || 'Contact for pricing'}</div>
+                          <div className="text-sm text-gray-500">per event</div>
+                        </div>
+                      </div>
+                      <p className="text-gray-600 text-sm mb-4">{pkg.description}</p>
+                      {pkg.features && (
+                        <ul className="space-y-2">
+                          {pkg.features.map((feature, index) => (
+                            <li key={index} className="flex items-center text-sm text-gray-600">
+                              <FaCheckCircle className="text-green-500 mr-2 flex-shrink-0" />
+                              <span>{feature}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleRequestBooking(pkg.id);
+                        }}
+                        className="w-full mt-4 bg-primary-600 text-white py-2 px-4 rounded-lg hover:bg-primary-700 transition-colors font-medium"
+                      >
+                        Select Package
+                      </button>
+                    </div>
+                  ))
+                ) : (
+                  // Default packages if none provided by API
+                  [
+                    {
+                      id: 1,
+                      title: "Basic Package",
+                      description: "Perfect for intimate gatherings. Includes basic decoration, sound system, and seating arrangement.",
+                      price: "PKR 25,000",
+                      features: ["Basic Decoration", "Sound System", "Seating for 100", "4 Hours Duration"]
+                    },
+                    {
+                      id: 2,
+                      title: "Premium Package",
+                      description: "Ideal for medium-sized events. Enhanced decoration, catering options, and extended venue access.",
+                      price: "PKR 65,000",
+                      features: ["Premium Decoration", "Catering Service", "Seating for 250", "6 Hours Duration", "Photography"]
+                    },
+                    {
+                      id: 3,
+                      title: "Luxury Package",
+                      description: "The ultimate celebration experience. Full-service planning, gourmet catering, and premium amenities.",
+                      price: "PKR 1,25,000",
+                      features: ["Luxury Decoration", "Gourmet Catering", "Seating for 500", "Full Day Access", "Photography & Videography", "Event Coordinator"]
+                    }
+                  ].map((pkg) => (
+                    <div
+                      key={pkg.id}
+                      className={`border-2 rounded-xl p-6 cursor-pointer transition-all duration-200 ${
+                        selectedPackage === pkg.id
+                          ? 'border-primary-500 bg-primary-50'
+                          : 'border-gray-200 hover:border-gray-300'
+                      }`}
+                      onClick={() => setSelectedPackage(selectedPackage === pkg.id ? null : pkg.id)}
+                    >
+                      <div className="flex justify-between items-start mb-4">
+                        <h3 className="text-lg font-semibold text-gray-900">{pkg.title}</h3>
+                        <div className="text-right">
+                          <div className="text-xl font-bold text-primary-600">{pkg.price}</div>
+                          <div className="text-sm text-gray-500">per event</div>
+                        </div>
+                      </div>
+                      <p className="text-gray-600 text-sm mb-4">{pkg.description}</p>
+                      <ul className="space-y-2">
+                        {pkg.features.map((feature, index) => (
+                          <li key={index} className="flex items-center text-sm text-gray-600">
+                            <FaCheckCircle className="text-green-500 mr-2 flex-shrink-0" />
+                            <span>{feature}</span>
+                          </li>
+                        ))}
+                      </ul>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleRequestBooking(pkg.id);
+                        }}
+                        className="w-full mt-4 bg-primary-600 text-white py-2 px-4 rounded-lg hover:bg-primary-700 transition-colors font-medium"
+                      >
+                        Select Package
+                      </button>
+                    </div>
+                  ))
+                )}
               </div>
             </div>
           </div>
 
           {/* Sidebar */}
           <div className="lg:col-span-1">
-            <div className="bg-white rounded-2xl shadow-soft p-6 sticky top-24">
+            <div className="bg-white rounded-2xl shadow-soft p-6 sticky top-32">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Contact Vendor</h3>
               
               <div className="space-y-4">

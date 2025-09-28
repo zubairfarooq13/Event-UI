@@ -1,0 +1,64 @@
+/* HomeSearch Landing Page Styles */
+.home-search-landing {
+  min-height: 100vh;
+  background-color: #f9fafb;
+}
+
+/* Smooth scrolling for the entire page */
+.home-search-landing {
+  scroll-behavior: smooth;
+}
+
+/* Adjust spacing for fixed header */
+.home-search-landing > div:first-child + div {
+  padding-top: 0;
+}
+
+/* Override any conflicting styles */
+.home-search-landing .bg-gray-50 {
+  background-color: transparent;
+}
+
+/* Ensure sections have proper spacing */
+.home-search-landing > *:not(:first-child) {
+  position: relative;
+  z-index: 1;
+}
+
+/* Add subtle animations for better UX */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.home-search-landing > * {
+  animation: fadeInUp 0.6s ease-out;
+  animation-fill-mode: both;
+}
+
+.home-search-landing > *:nth-child(2) { animation-delay: 0.1s; }
+.home-search-landing > *:nth-child(3) { animation-delay: 0.2s; }
+.home-search-landing > *:nth-child(4) { animation-delay: 0.3s; }
+.home-search-landing > *:nth-child(5) { animation-delay: 0.4s; }
+.home-search-landing > *:nth-child(6) { animation-delay: 0.5s; }
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .home-search-landing {
+    padding-top: 64px; /* Account for mobile header height */
+  }
+}
+
+/* Prefers reduced motion - disable animations for accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .home-search-landing * {
+    animation: none !important;
+    transition: none !important;
+  }
+}
