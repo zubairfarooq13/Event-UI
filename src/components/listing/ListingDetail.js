@@ -29,6 +29,7 @@ const ListingDetail = ({ onBookingRequest }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [selectedPackage, setSelectedPackage] = useState(null);
   const [isFavorite, setIsFavorite] = useState(false);
+  const [showContactInfo, setShowContactInfo] = useState(false);
 
   // Fetch vendor details on component mount
   useEffect(() => {
@@ -470,14 +471,25 @@ const ListingDetail = ({ onBookingRequest }) => {
                 </div>
 
                 <div className="space-y-2">
-                  <div className="flex items-center text-sm text-gray-600">
-                    <FaPhone className="mr-3 text-primary-600" />
-                    <span>{listingData.vendor.phone}</span>
-                  </div>
-                  <div className="flex items-center text-sm text-gray-600">
-                    <FaEnvelope className="mr-3 text-primary-600" />
-                    <span>{listingData.vendor.email}</span>
-                  </div>
+                  {!showContactInfo ? (
+                    <button
+                      onClick={() => setShowContactInfo(true)}
+                      className="w-full bg-primary-600 text-white py-2 px-4 rounded-lg hover:bg-primary-700 transition-colors font-medium text-sm"
+                    >
+                      Show Contact Information
+                    </button>
+                  ) : (
+                    <>
+                      <div className="flex items-center text-sm text-gray-600">
+                        <FaPhone className="mr-3 text-primary-600" />
+                        <span>{listingData.vendor.phone}</span>
+                      </div>
+                      <div className="flex items-center text-sm text-gray-600">
+                        <FaEnvelope className="mr-3 text-primary-600" />
+                        <span>{listingData.vendor.email}</span>
+                      </div>
+                    </>
+                  )}
                 </div>
 
                 <div className="border-t border-gray-200 pt-4">
