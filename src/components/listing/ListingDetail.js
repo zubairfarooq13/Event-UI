@@ -110,11 +110,12 @@ The venue features beautiful fabric draping, comfortable seating arrangements, a
   };
 
   return (
+
     <div className="min-h-screen bg-gray-50">
-      <LandingHeader />
+          <LandingHeader />
       {/* Breadcrumb */}
-      <div className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 py-3">
+      <div className="bg-white border-b border-gray-200 mt-16">
+        <div className="max-w-[1600px] mx-auto px-4 py-3">
           <div className="flex items-center gap-2 text-sm text-gray-600">
             <Link to="/" className="hover:text-teal-600">Home</Link>
             <span>/</span>
@@ -125,7 +126,7 @@ The venue features beautiful fabric draping, comfortable seating arrangements, a
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 py-8">
+      <div className="max-w-[1600px] mx-auto px-4 py-8">
         {/* Image Gallery */}
         <div className="mb-8">
           <ImageGallery images={venue.images} />
@@ -179,9 +180,11 @@ The venue features beautiful fabric draping, comfortable seating arrangements, a
 
             {/* About Section */}
             <div className="bg-white rounded-lg border border-gray-200 p-6">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">About this space</h2>
-              <div className="text-gray-700 whitespace-pre-line leading-relaxed">
-                {venue.description}
+              <h2 className="text-xl font-semibold text-gray-900 mb-4">About this space</h2>
+              <div className="text-gray-600 text-[15px] leading-relaxed space-y-4">
+                {venue.description.split('\n\n').map((paragraph, index) => (
+                  <p key={index}>{paragraph}</p>
+                ))}
               </div>
             </div>
 
@@ -209,14 +212,14 @@ The venue features beautiful fabric draping, comfortable seating arrangements, a
 
             {/* Rules of the Space */}
             <div className="bg-white rounded-lg border border-gray-200 p-6">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">Rules of the space</h2>
+              <h2 className="text-xl font-semibold text-gray-900 mb-5">Rules of the space</h2>
               
               <div className="space-y-6">
                 <div>
-                  <h3 className="font-semibold text-gray-900 mb-3">Allowed events</h3>
+                  <h3 className="font-medium text-gray-900 mb-3 text-[15px]">Allowed events</h3>
                   <div className="flex flex-wrap gap-2">
                     {venue.rules.allowedEvents.map((event, index) => (
-                      <span key={index} className="bg-gray-100 px-3 py-1 rounded-full text-sm text-gray-700">
+                      <span key={index} className="bg-gray-100 px-3 py-1.5 rounded-full text-sm text-gray-700">
                         {event}
                       </span>
                     ))}
@@ -224,10 +227,10 @@ The venue features beautiful fabric draping, comfortable seating arrangements, a
                 </div>
 
                 <div>
-                  <h3 className="font-semibold text-gray-900 mb-3">House rules</h3>
+                  <h3 className="font-medium text-gray-900 mb-3 text-[15px]">House rules</h3>
                   <ul className="space-y-2">
                     {venue.rules.hostRules.map((rule, index) => (
-                      <li key={index} className="flex items-start gap-2 text-gray-700">
+                      <li key={index} className="flex items-start gap-2 text-gray-600 text-[15px]">
                         <span className="text-teal-500 mt-1">•</span>
                         <span>{rule}</span>
                       </li>
@@ -236,8 +239,8 @@ The venue features beautiful fabric draping, comfortable seating arrangements, a
                 </div>
 
                 <div>
-                  <h3 className="font-semibold text-gray-900 mb-3">Cancellation policy</h3>
-                  <p className="text-gray-700">{venue.rules.cancellationPolicy}</p>
+                  <h3 className="font-medium text-gray-900 mb-3 text-[15px]">Cancellation policy</h3>
+                  <p className="text-gray-600 text-[15px] leading-relaxed">{venue.rules.cancellationPolicy}</p>
                 </div>
               </div>
             </div>
@@ -247,8 +250,8 @@ The venue features beautiful fabric draping, comfortable seating arrangements, a
 
             {/* About the Venue */}
             <div className="bg-white rounded-lg border border-gray-200 p-6">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">About {venue.venueName}</h2>
-              <p className="text-gray-700 leading-relaxed">
+              <h2 className="text-xl font-semibold text-gray-900 mb-4">About {venue.venueName}</h2>
+              <p className="text-gray-600 text-[15px] leading-relaxed">
                 {venue.venueName} is a unique venue in the heart of London, dedicated to providing 
                 exceptional spaces for memorable events. With a commitment to quality service and 
                 attention to detail, we ensure every event is a success.
@@ -257,14 +260,14 @@ The venue features beautiful fabric draping, comfortable seating arrangements, a
 
             {/* Meet Your Host */}
             <div className="bg-white rounded-lg border border-gray-200 p-6">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">Meet your host</h2>
+              <h2 className="text-xl font-semibold text-gray-900 mb-5">Meet your host</h2>
               <div className="flex items-start gap-4">
                 <div className="w-16 h-16 rounded-full bg-teal-100 flex items-center justify-center flex-shrink-0">
                   <span className="text-teal-700 font-semibold text-xl">{venue.host.initials}</span>
                 </div>
                 <div className="flex-1">
-                  <h3 className="font-semibold text-gray-900 text-lg mb-2">{venue.host.name}</h3>
-                  <p className="text-gray-700">{venue.host.about}</p>
+                  <h3 className="font-medium text-gray-900 text-base mb-2">{venue.host.name}</h3>
+                  <p className="text-gray-600 text-[15px] leading-relaxed">{venue.host.about}</p>
                 </div>
               </div>
             </div>
