@@ -32,7 +32,7 @@ const ImageGallery = ({ images = [] }) => {
   return (
     <>
       {/* Main Gallery */}
-      <div className="grid grid-cols-4 gap-2 h-96 rounded-lg overflow-hidden">
+      <div className="grid grid-cols-4 grid-rows-2 gap-2 h-96 rounded-lg overflow-hidden">
         {/* Main large image */}
         <div 
           className="col-span-3 row-span-2 relative cursor-pointer group"
@@ -49,19 +49,18 @@ const ImageGallery = ({ images = [] }) => {
           <div className="absolute inset-0 bg-black opacity-0 group-hover:opacity-10 transition-opacity"></div>
         </div>
 
-        {/* Thumbnail images */}
-        {defaultImages.slice(1, 5).map((img, index) => (
+        {/* Top right thumbnail */}
+        {defaultImages.length > 1 && (
           <div
-            key={index}
-            className="relative cursor-pointer group"
+            className="relative cursor-pointer group row-start-1"
             onClick={() => {
-              setCurrentIndex(index + 1);
+              setCurrentIndex(1);
               openFullscreen();
             }}
           >
             <img
-              src={img}
-              alt={`Venue ${index + 2}`}
+              src={defaultImages[1]}
+              alt="Venue 2"
               className="w-full h-full object-cover"
               onError={(e) => {
                 e.target.src = 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=600&h=400&fit=crop';
@@ -69,27 +68,36 @@ const ImageGallery = ({ images = [] }) => {
             />
             <div className="absolute inset-0 bg-black opacity-0 group-hover:opacity-10 transition-opacity"></div>
           </div>
-        ))}
+        )}
 
-        {/* Show all photos button */}
-        {defaultImages.length > 5 && (
+        {/* Bottom right thumbnail with overlay */}
+        {defaultImages.length > 2 && (
           <div
-            className="relative cursor-pointer group bg-gray-900"
-            onClick={openFullscreen}
+            className="relative cursor-pointer group bg-gray-900 row-start-2"
+            onClick={() => {
+              setCurrentIndex(2);
+              openFullscreen();
+            }}
           >
             <img
-              src={defaultImages[5]}
-              alt="More photos"
-              className="w-full h-full object-cover opacity-50"
+              src={defaultImages[2]}
+              alt="Venue 3"
+              className="w-full h-full object-cover"
+              style={{ opacity: defaultImages.length > 3 ? 0.5 : 1 }}
               onError={(e) => {
                 e.target.src = 'https://images.unsplash.com/photo-1470337458703-46ad1756a187?w=600&h=400&fit=crop';
               }}
             />
-            <div className="absolute inset-0 flex items-center justify-center">
-              <span className="text-white text-sm font-semibold">
-                +{defaultImages.length - 5} photos
-              </span>
-            </div>
+            {defaultImages.length > 3 && (
+              <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-40">
+                <span className="text-white text-base font-semibold">
+                  +{defaultImages.length - 3} photos
+                </span>
+              </div>
+            )}
+            {defaultImages.length <= 3 && (
+              <div className="absolute inset-0 bg-black opacity-0 group-hover:opacity-10 transition-opacity"></div>
+            )}
           </div>
         )}
       </div>
