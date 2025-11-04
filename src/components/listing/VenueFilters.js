@@ -231,7 +231,7 @@ const VenueFilters = ({ onFilterChange, initialFilters = {} }) => {
                   </div>
                   
                   {/* Max Price */}
-                  <div >
+                  <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">Max price</label>
                     <div className="flex items-center border border-gray-300 rounded-md overflow-hidden focus-within:border-teal-500 focus-within:ring-1 focus-within:ring-teal-500">
                       <div className="px-3 py-2 bg-gray-50 border-r border-gray-300">
