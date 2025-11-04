@@ -14,6 +14,27 @@ const ListingsPage = () => {
   const [error, setError] = useState(null);
   const [currentFilters, setCurrentFilters] = useState({});
 
+  // Dummy data for demonstration
+  const dummyVenue = {
+    id: 'dummy-1',
+    name: 'Baaria',
+    city: 'London',
+    area: 'Covent Garden',
+    venueType: 'Lounge',
+    category: 'Bar',
+    spaceType: 'Private space',
+    capacity: 30,
+    seatedCapacity: 25,
+    standingCapacity: 30,
+    price: 800,
+    priceType: 'minimum spend / per session',
+    photo: 'https://images.unsplash.com/photo-1514933651103-005eec06c04b?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+    rating: 5,
+    reviewCount: 8,
+    responseTime: '2h',
+    isSupervenue: true
+  };
+
   useEffect(() => {
     const fetchVenues = async () => {
       setLoading(true);
@@ -26,6 +47,9 @@ const ListingsPage = () => {
         if (searchParams.get('eventType')) filters.eventType = searchParams.get('eventType');
         if (searchParams.get('budget')) filters.budget = searchParams.get('budget');
         if (searchParams.get('capacity')) filters.capacity = searchParams.get('capacity');
+        if (searchParams.get('minPrice')) filters.minPrice = searchParams.get('minPrice');
+        if (searchParams.get('maxPrice')) filters.maxPrice = searchParams.get('maxPrice');
+        if (searchParams.get('date')) filters.date = searchParams.get('date');
         
         // If no URL params, try localStorage (from search form)
         if (Object.keys(filters).length === 0) {
@@ -37,10 +61,12 @@ const ListingsPage = () => {
 
         // Store current filters for the filter component
         setCurrentFilters({
-          eventType: filters.eventType || '',
-          location: filters.city || '',
-          guests: filters.capacity || '',
-          priceRange: filters.budget || '',
+          eventType: filters.eventType || searchParams.get('eventType') || '',
+          location: filters.city || searchParams.get('city') || '',
+          guests: filters.capacity || searchParams.get('capacity') || '',
+          date: filters.date || searchParams.get('date') || '',
+          minPrice: filters.minPrice || searchParams.get('minPrice') || '',
+          maxPrice: filters.maxPrice || searchParams.get('maxPrice') || '',
         });
 
         // Call the backend API
@@ -83,7 +109,8 @@ const ListingsPage = () => {
     if (newFilters.eventType) params.set('eventType', newFilters.eventType);
     if (newFilters.location) params.set('city', newFilters.location);
     if (newFilters.guests) params.set('capacity', newFilters.guests);
-    if (newFilters.priceRange) params.set('budget', newFilters.priceRange);
+    if (newFilters.minPrice) params.set('minPrice', newFilters.minPrice);
+    if (newFilters.maxPrice) params.set('maxPrice', newFilters.maxPrice);
     if (newFilters.date) params.set('date', newFilters.date);
     
     setSearchParams(params);

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FaChevronDown, FaUsers, FaCalendar, FaMapMarkerAlt, FaSearch, FaDollarSign } from 'react-icons/fa';
 
 const VenueFilters = ({ onFilterChange, initialFilters = {} }) => {
@@ -16,6 +16,22 @@ const VenueFilters = ({ onFilterChange, initialFilters = {} }) => {
     min: initialFilters.minPrice || '',
     max: initialFilters.maxPrice || '',
   });
+
+  // Update filters when initialFilters changes (from URL params)
+  useEffect(() => {
+    setFilters({
+      eventType: initialFilters.eventType || '',
+      location: initialFilters.location || '',
+      guests: initialFilters.guests || '',
+      date: initialFilters.date || '',
+      minPrice: initialFilters.minPrice || '',
+      maxPrice: initialFilters.maxPrice || '',
+    });
+    setTempPriceRange({
+      min: initialFilters.minPrice || '',
+      max: initialFilters.maxPrice || '',
+    });
+  }, [initialFilters]);
 
   const eventTypes = [
     'Wedding',
