@@ -3,13 +3,16 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import Header from '../common/Header';
 import ListingCard from './ListingCard';
 import { venueService } from '../../services';
+import LandingHeader from '../landing/LandingHeader';
+import VenueFilters from './VenueFilters';
 
 const ListingsPage = () => {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [listings, setListings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [currentFilters, setCurrentFilters] = useState({});
 
   useEffect(() => {
     const fetchVenues = async () => {
@@ -31,6 +34,14 @@ const ListingsPage = () => {
             Object.assign(filters, JSON.parse(storedFilters));
           }
         }
+
+        // Store current filters for the filter component
+        setCurrentFilters({
+          eventType: filters.eventType || '',
+          location: filters.city || '',
+          guests: filters.capacity || '',
+          priceRange: filters.budget || '',
+        });
 
         // Call the backend API
         const result = await venueService.searchVenues(filters, 1, 20);
@@ -66,10 +77,26 @@ const ListingsPage = () => {
     navigate(`/venues/${id}`);
   };
 
+  const handleFilterChange = (newFilters) => {
+    // Update URL search params
+    const params = new URLSearchParams();
+    if (newFilters.eventType) params.set('eventType', newFilters.eventType);
+    if (newFilters.location) params.set('city', newFilters.location);
+    if (newFilters.guests) params.set('capacity', newFilters.guests);
+    if (newFilters.priceRange) params.set('budget', newFilters.priceRange);
+    if (newFilters.date) params.set('date', newFilters.date);
+    
+    setSearchParams(params);
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header />
-      <div className="container mx-auto px-4 py-6 max-w-7xl pt-20">
+      <LandingHeader />
+      <VenueFilters 
+        onFilterChange={handleFilterChange}
+        initialFilters={currentFilters}
+      />
+      <div className="container mx-auto px-4 py-6 max-w-7xl">
         
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Event Venues</h1>
