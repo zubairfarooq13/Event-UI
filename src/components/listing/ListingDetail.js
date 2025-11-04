@@ -7,6 +7,7 @@ import BookingSidebar from './BookingSidebar';
 import PricingSection from './PricingSection';
 import AmenitiesSection from './AmenitiesSection';
 import ReviewsSection from './ReviewsSection';
+import PackagesSection from './PackagesSection';
 import LandingHeader from '../landing/LandingHeader';
 
 const ListingDetail = () => {
@@ -190,6 +191,9 @@ The venue features beautiful fabric draping, comfortable seating arrangements, a
 
             {/* Pricing */}
             <PricingSection />
+
+            {/* Packages & Offers */}
+            <PackagesSection />  
 
             {/* Catering & Drinks */}
             <AmenitiesSection 
