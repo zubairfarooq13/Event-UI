@@ -1,7 +1,6 @@
 import React from 'react';
 import { 
   FaMapMarkerAlt,
-  FaRupeeSign,
   FaUsers,
   FaHeart,
   FaFilter
@@ -18,15 +17,6 @@ const cities = [
   'Quetta',
   'Sialkot',
   'Gujranwala',
-];
-
-const budgetRanges = [
-  { label: 'Under ₹5,000', value: '0-5000' },
-  { label: '₹5,000 - ₹15,000', value: '5000-15000' },
-  { label: '₹15,000 - ₹30,000', value: '15000-30000' },
-  { label: '₹30,000 - ₹50,000', value: '30000-50000' },
-  { label: '₹50,000 - ₹1,00,000', value: '50000-100000' },
-  { label: 'Above ₹1,00,000', value: '100000-999999' },
 ];
 
 const eventTypes = [
@@ -67,7 +57,7 @@ const SearchFilters = ({
             </p>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {/* City Filter */}
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-3">
@@ -104,24 +94,6 @@ const SearchFilters = ({
               </select>
             </div>
 
-            {/* Budget Filter */}
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-3">
-                <FaRupeeSign className="inline mr-2 text-primary-600" />
-                Budget Range
-              </label>
-              <select
-                value={filters.budget}
-                onChange={(e) => onFilterChange('budget', e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all duration-200 bg-white"
-              >
-                <option value="">Select Budget</option>
-                {budgetRanges.map(range => (
-                  <option key={range.value} value={range.value}>{range.label}</option>
-                ))}
-              </select>
-            </div>
-
             {/* Capacity Filter */}
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-3">
@@ -141,7 +113,7 @@ const SearchFilters = ({
           </div>
 
           {/* Active Filters Display */}
-          {(selectedCategory || filters.city || filters.eventType || filters.budget || filters.capacity) && (
+          {(selectedCategory || filters.city || filters.eventType || filters.capacity) && (
             <div className="mt-8 p-4 bg-primary-50 rounded-xl border border-primary-200">
               <h4 className="text-sm font-semibold text-primary-800 mb-3">Active Filters:</h4>
               <div className="flex flex-wrap gap-2">
@@ -158,11 +130,6 @@ const SearchFilters = ({
                 {filters.eventType && (
                   <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-primary-100 text-primary-800">
                     Event: {filters.eventType}
-                  </span>
-                )}
-                {filters.budget && (
-                  <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-primary-100 text-primary-800">
-                    Budget: {budgetRanges.find(r => r.value === filters.budget)?.label}
                   </span>
                 )}
                 {filters.capacity && (
@@ -193,7 +160,7 @@ const SearchFilters = ({
                   onSearch(searchData);
                 }
               }}
-              disabled={!filters.city && !filters.eventType && !filters.budget && !filters.capacity && !selectedCategory}
+              disabled={!filters.city && !filters.eventType && !filters.capacity && !selectedCategory}
               className="px-8 py-3 bg-primary-600 text-white font-semibold rounded-xl hover:bg-primary-700 focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition-all duration-200 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center gap-2"
             >
               <FaFilter className="w-4 h-4" />

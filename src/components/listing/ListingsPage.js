@@ -4,34 +4,6 @@ import Header from '../common/Header';
 import ListingCard from './ListingCard';
 import { venueService } from '../../services';
 
-// Dummy data for listings
-// const generateDummyListings = () => [
-//   {
-//     id: 1,
-//     name: "Royal Marquee",
-//     city: "Lahore",
-//     capacity: 500,
-//     price: 250000,
-//     photo: "https://placehold.co/400x300/3B82F6/FFFFFF?text=Royal+Marquee"
-//   },
-//   {
-//     id: 2,
-//     name: "Garden Paradise",
-//     city: "Karachi", 
-//     capacity: 300,
-//     price: 180000,
-//     photo: "https://placehold.co/400x300/10B981/FFFFFF?text=Garden+Paradise"
-//   },
-//   {
-//     id: 3,
-//     name: "Elite Banquet Hall",
-//     city: "Islamabad",
-//     capacity: 800,
-//     price: 450000,
-//     photo: "https://placehold.co/400x300/8B5CF6/FFFFFF?text=Elite+Banquet"
-//   }
-// ];
-
 const ListingsPage = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
