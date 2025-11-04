@@ -14,27 +14,6 @@ const ListingsPage = () => {
   const [error, setError] = useState(null);
   const [currentFilters, setCurrentFilters] = useState({});
 
-  // Dummy data for demonstration
-  const dummyVenue = {
-    id: 'dummy-1',
-    name: 'Baaria',
-    city: 'London',
-    area: 'Covent Garden',
-    venueType: 'Lounge',
-    category: 'Bar',
-    spaceType: 'Private space',
-    capacity: 30,
-    seatedCapacity: 25,
-    standingCapacity: 30,
-    price: 800,
-    priceType: 'minimum spend / per session',
-    photo: 'https://images.unsplash.com/photo-1514933651103-005eec06c04b?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-    rating: 5,
-    reviewCount: 8,
-    responseTime: '2h',
-    isSupervenue: true
-  };
-
   useEffect(() => {
     const fetchVenues = async () => {
       setLoading(true);

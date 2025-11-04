@@ -1,20 +1,18 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { FaMapMarkerAlt, FaHeart, FaStar, FaClock } from 'react-icons/fa';
 import { MdPeople, MdEventSeat } from 'react-icons/md';
 
-const ListingCard = ({ listing, onViewDetails }) => {
-  const handleViewDetails = () => {
-    onViewDetails(listing.id);
-  };
+const ListingCard = ({ listing }) => {
 
   const formatPrice = (price) => {
     return `£${price.toLocaleString()}`;
   };
 
   return (
-    <div 
-      className="bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer group border border-gray-100"
-      onClick={handleViewDetails}
+    <Link 
+      to={`/venues/${listing.id}`}
+      className="bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer group border border-gray-100 block"
     >
       {/* Image Container */}
       <div className="relative h-52 overflow-hidden bg-gray-100">
@@ -109,7 +107,7 @@ const ListingCard = ({ listing, onViewDetails }) => {
           <span>Responds within {listing.responseTime || '2h'}</span>
         </div>
       </div>
-    </div>
+    </Link>
   );
 };
 
