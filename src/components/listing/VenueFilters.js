@@ -1,7 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { FaChevronDown, FaUsers, FaCalendar, FaMapMarkerAlt, FaSearch, FaDollarSign } from 'react-icons/fa';
 
 const VenueFilters = ({ onFilterChange, initialFilters = {} }) => {
+  const eventTypeRef = useRef(null);
+  const locationRef = useRef(null);
+  
   const [filters, setFilters] = useState({
     eventType: initialFilters.eventType || '',
     location: initialFilters.location || '',
@@ -16,6 +19,11 @@ const VenueFilters = ({ onFilterChange, initialFilters = {} }) => {
     min: initialFilters.minPrice || '',
     max: initialFilters.maxPrice || '',
   });
+
+  const [showEventTypeSuggestions, setShowEventTypeSuggestions] = useState(false);
+  const [showLocationSuggestions, setShowLocationSuggestions] = useState(false);
+  const [filteredEventTypes, setFilteredEventTypes] = useState([]);
+  const [filteredLocations, setFilteredLocations] = useState([]);
 
   // Update filters when initialFilters changes (from URL params)
   useEffect(() => {
@@ -33,19 +41,74 @@ const VenueFilters = ({ onFilterChange, initialFilters = {} }) => {
     });
   }, [initialFilters]);
 
+  // Handle click outside to close autocomplete suggestions
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (eventTypeRef.current && !eventTypeRef.current.contains(event.target)) {
+        setShowEventTypeSuggestions(false);
+      }
+      if (locationRef.current && !locationRef.current.contains(event.target)) {
+        setShowLocationSuggestions(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
   const eventTypes = [
     'Wedding',
-    'Corporate Event',
+    'Wedding Reception',
+    'Engagement Ceremony',
+    'Mehndi Event',
+    'Baraat Ceremony',
+    'Walima',
     'Birthday Party',
+    'Anniversary Celebration',
+    'Corporate Event',
+    'Corporate Meeting',
     'Conference',
     'Seminar',
+    'Workshop',
+    'Business Launch',
     'Product Launch',
+    'Team Building Event',
     'Networking Event',
-    'Team Building',
-    'Graduation',
-    'Anniversary',
+    'Trade Show',
+    'Exhibition',
+    'Awards Ceremony',
+    'Gala Dinner',
+    'Charity Event',
+    'Fundraiser',
+    'Graduation Party',
     'Baby Shower',
-    'Engagement',
+    'Bridal Shower',
+    'Cocktail Party',
+    'Dinner Party',
+    'Lunch Event',
+    'Breakfast Meeting',
+    'Social Gathering',
+    'Family Reunion',
+    'Festival Celebration',
+    'Religious Event',
+    'Cultural Event',
+    'Music Concert',
+    'Art Exhibition',
+    'Fashion Show',
+    'Sports Event',
+    'Outdoor Event',
+    'Beach Party',
+    'Garden Party',
+    'Picnic',
+    'BBQ Event',
+    'Retirement Party',
+    'Farewell Party',
+    'Welcome Party',
+    'Holiday Party',
+    'New Year Party',
+    'Christmas Party'
   ];
 
   const locations = [
@@ -61,6 +124,44 @@ const VenueFilters = ({ onFilterChange, initialFilters = {} }) => {
     'Gujranwala',
     'Hyderabad',
     'Bahawalpur',
+    'Sargodha',
+    'Sukkur',
+    'Larkana',
+    'Sheikhupura',
+    'Jhang',
+    'Rahim Yar Khan',
+    'Gujrat',
+    'Mardan',
+    'Kasur',
+    'Mingora',
+    'Dera Ghazi Khan',
+    'Sahiwal',
+    'Nawabshah',
+    'Okara',
+    'Mirpur Khas',
+    'Chiniot',
+    'Kamoke',
+    'Sadiqabad',
+    'Burewala',
+    'Jacobabad',
+    'Muzaffargarh',
+    'Khanpur',
+    'Gojra',
+    'Mandi Bahauddin',
+    'Abbottabad',
+    'Turbat',
+    'Dadu',
+    'Bahawalnagar',
+    'Khanewal',
+    'Shikarpur',
+    'Hafizabad',
+    'Kohat',
+    'Jhelum',
+    'Muridke',
+    'Karak',
+    'Khushab',
+    'Dera Ismail Khan',
+    'Chaman'
   ];
 
   const guestRanges = [
@@ -71,9 +172,62 @@ const VenueFilters = ({ onFilterChange, initialFilters = {} }) => {
     { label: '500+', value: '500+' },
   ];
 
-  const handleFilterChange = (field, value) => {
+  const handleInputChange = (field, value) => {
+    // Only update local state, don't trigger backend call
     const newFilters = { ...filters, [field]: value };
     setFilters(newFilters);
+
+    // Filter event types based on input
+    if (field === 'eventType') {
+      if (value.trim()) {
+        const filtered = eventTypes.filter(type =>
+          type.toLowerCase().includes(value.toLowerCase())
+        );
+        setFilteredEventTypes(filtered);
+        setShowEventTypeSuggestions(true);
+      } else {
+        setFilteredEventTypes([]);
+        setShowEventTypeSuggestions(false);
+      }
+    }
+
+    // Filter locations based on input
+    if (field === 'location') {
+      if (value.trim()) {
+        const filtered = locations.filter(city =>
+          city.toLowerCase().includes(value.toLowerCase())
+        );
+        setFilteredLocations(filtered);
+        setShowLocationSuggestions(true);
+      } else {
+        setFilteredLocations([]);
+        setShowLocationSuggestions(false);
+      }
+    }
+  };
+
+  const handleFilterChange = (field, value) => {
+    // For non-autocomplete fields, trigger backend call immediately
+    const newFilters = { ...filters, [field]: value };
+    setFilters(newFilters);
+    onFilterChange(newFilters);
+  };
+
+  const selectEventType = (type) => {
+    const newFilters = { ...filters, eventType: type };
+    setFilters(newFilters);
+    setShowEventTypeSuggestions(false);
+    setFilteredEventTypes([]);
+    // Trigger backend call only on selection
+    onFilterChange(newFilters);
+  };
+
+  const selectLocation = (location) => {
+    const newFilters = { ...filters, location: location };
+    setFilters(newFilters);
+    setShowLocationSuggestions(false);
+    setFilteredLocations([]);
+    // Trigger backend call only on selection
     onFilterChange(newFilters);
   };
 
@@ -138,31 +292,79 @@ const VenueFilters = ({ onFilterChange, initialFilters = {} }) => {
       <div className="max-w-7xl mx-auto px-6 lg:px-8 py-4">
         <div className="flex flex-wrap items-center gap-3">
           {/* Event Type Filter - Input Field */}
-          <div className="relative">
+          <div ref={eventTypeRef} className="relative">
             <div className="flex items-center gap-2 px-4 py-2 rounded-full border border-gray-300 bg-white hover:border-gray-400 transition-all">
               <FaSearch className="w-3.5 h-3.5 text-gray-700" />
               <input
                 type="text"
                 value={filters.eventType}
-                onChange={(e) => handleFilterChange('eventType', e.target.value)}
+                onChange={(e) => handleInputChange('eventType', e.target.value)}
+                onFocus={() => {
+                  if (filters.eventType.trim()) {
+                    const filtered = eventTypes.filter(type =>
+                      type.toLowerCase().includes(filters.eventType.toLowerCase())
+                    );
+                    setFilteredEventTypes(filtered);
+                  }
+                  setShowEventTypeSuggestions(true);
+                }}
                 placeholder="Event Type"
                 className="text-sm font-medium text-gray-700 focus:outline-none bg-transparent w-32"
               />
             </div>
+            
+            {/* Event Type Suggestions Dropdown */}
+            {showEventTypeSuggestions && filteredEventTypes.length > 0 && (
+              <div className="absolute top-full mt-2 left-0 right-0 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto z-50 min-w-[200px]">
+                {filteredEventTypes.map((type, index) => (
+                  <div
+                    key={index}
+                    onClick={() => selectEventType(type)}
+                    className="px-4 py-2.5 hover:bg-gray-50 cursor-pointer text-sm text-gray-700 border-b border-gray-100 last:border-b-0 transition-colors"
+                  >
+                    {type}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Location Filter - Input Field */}
-          <div className="relative">
+          <div ref={locationRef} className="relative">
             <div className="flex items-center gap-2 px-4 py-2 rounded-full border border-gray-300 bg-white hover:border-gray-400 transition-all">
               <FaMapMarkerAlt className="w-3.5 h-3.5 text-gray-700" />
               <input
                 type="text"
                 value={filters.location}
-                onChange={(e) => handleFilterChange('location', e.target.value)}
+                onChange={(e) => handleInputChange('location', e.target.value)}
+                onFocus={() => {
+                  if (filters.location.trim()) {
+                    const filtered = locations.filter(city =>
+                      city.toLowerCase().includes(filters.location.toLowerCase())
+                    );
+                    setFilteredLocations(filtered);
+                  }
+                  setShowLocationSuggestions(true);
+                }}
                 placeholder="Location"
                 className="text-sm font-medium text-gray-700 focus:outline-none bg-transparent w-32"
               />
             </div>
+            
+            {/* Location Suggestions Dropdown */}
+            {showLocationSuggestions && filteredLocations.length > 0 && (
+              <div className="absolute top-full mt-2 left-0 right-0 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto z-50 min-w-[200px]">
+                {filteredLocations.map((city, index) => (
+                  <div
+                    key={index}
+                    onClick={() => selectLocation(city)}
+                    className="px-4 py-2.5 hover:bg-gray-50 cursor-pointer text-sm text-gray-700 border-b border-gray-100 last:border-b-0 transition-colors"
+                  >
+                    {city}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Guests Filter */}

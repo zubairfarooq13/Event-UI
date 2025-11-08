@@ -127,7 +127,7 @@ The venue features beautiful fabric draping, comfortable seating arrangements, a
         </div>
       </div>
 
-      <div className="max-w-[1600px] mx-auto px-4 py-8">
+      <div className="max-w-[1200px] mx-auto px-4 py-8">
         {/* Image Gallery */}
         <div className="mb-8">
           <ImageGallery images={venue.images} />
@@ -250,9 +250,9 @@ The venue features beautiful fabric draping, comfortable seating arrangements, a
             </div>
 
             {/* Reviews */}
-            <ReviewsSection rating={venue.rating} totalReviews={venue.reviewCount} />
+            {/* <ReviewsSection rating={venue.rating} totalReviews={venue.reviewCount} /> */}
 
-            {/* About the Venue */}
+            {/* About the Venue
             <div className="bg-white rounded-lg border border-gray-200 p-6">
               <h2 className="text-xl font-semibold text-gray-900 mb-4">About {venue.venueName}</h2>
               <p className="text-gray-600 text-[15px] leading-relaxed">
@@ -260,7 +260,7 @@ The venue features beautiful fabric draping, comfortable seating arrangements, a
                 exceptional spaces for memorable events. With a commitment to quality service and 
                 attention to detail, we ensure every event is a success.
               </p>
-            </div>
+            </div> */}
 
             {/* Meet Your Host */}
             <div className="bg-white rounded-lg border border-gray-200 p-6">

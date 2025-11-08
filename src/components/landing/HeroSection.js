@@ -1,19 +1,66 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const HeroSection = () => {
   const navigate = useNavigate();
+  const eventTypeRef = useRef(null);
+  const locationRef = useRef(null);
+  
   const [searchData, setSearchData] = useState({
     eventType: '',
     guests: '',
-    location: 'Karachi'
+    location: ''
   });
+  const [showEventTypeSuggestions, setShowEventTypeSuggestions] = useState(false);
+  const [showLocationSuggestions, setShowLocationSuggestions] = useState(false);
+  const [filteredEventTypes, setFilteredEventTypes] = useState([]);
+  const [filteredLocations, setFilteredLocations] = useState([]);
 
   const handleInputChange = (field, value) => {
     setSearchData(prev => ({
       ...prev,
       [field]: value
     }));
+
+    // Filter event types based on input
+    if (field === 'eventType') {
+      if (value.trim()) {
+        const filtered = eventTypes.filter(type =>
+          type.toLowerCase().includes(value.toLowerCase())
+        );
+        setFilteredEventTypes(filtered);
+        setShowEventTypeSuggestions(true);
+      } else {
+        setFilteredEventTypes([]);
+        setShowEventTypeSuggestions(false);
+      }
+    }
+
+    // Filter locations based on input
+    if (field === 'location') {
+      if (value.trim()) {
+        const filtered = locations.filter(loc =>
+          loc.toLowerCase().includes(value.toLowerCase())
+        );
+        setFilteredLocations(filtered);
+        setShowLocationSuggestions(true);
+      } else {
+        setFilteredLocations([]);
+        setShowLocationSuggestions(false);
+      }
+    }
+  };
+
+  const selectEventType = (type) => {
+    setSearchData(prev => ({ ...prev, eventType: type }));
+    setShowEventTypeSuggestions(false);
+    setFilteredEventTypes([]);
+  };
+
+  const selectLocation = (location) => {
+    setSearchData(prev => ({ ...prev, location: location }));
+    setShowLocationSuggestions(false);
+    setFilteredLocations([]);
   };
 
   const handleSearch = (e) => {
@@ -30,6 +77,23 @@ const HeroSection = () => {
     navigate(`/venues?${params.toString()}`);
   };
 
+  // Handle click outside to close suggestions
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (eventTypeRef.current && !eventTypeRef.current.contains(event.target)) {
+        setShowEventTypeSuggestions(false);
+      }
+      if (locationRef.current && !locationRef.current.contains(event.target)) {
+        setShowLocationSuggestions(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
   const locations = [
     'Karachi',
     'Lahore',
@@ -42,7 +106,98 @@ const HeroSection = () => {
     'Sialkot',
     'Gujranwala',
     'Hyderabad',
-    'Bahawalpur'
+    'Bahawalpur',
+    'Sargodha',
+    'Sukkur',
+    'Larkana',
+    'Sheikhupura',
+    'Jhang',
+    'Rahim Yar Khan',
+    'Gujrat',
+    'Mardan',
+    'Kasur',
+    'Mingora',
+    'Dera Ghazi Khan',
+    'Sahiwal',
+    'Nawabshah',
+    'Okara',
+    'Mirpur Khas',
+    'Chiniot',
+    'Kamoke',
+    'Sadiqabad',
+    'Burewala',
+    'Jacobabad',
+    'Muzaffargarh',
+    'Khanpur',
+    'Gojra',
+    'Mandi Bahauddin',
+    'Abbottabad',
+    'Turbat',
+    'Dadu',
+    'Bahawalnagar',
+    'Khanewal',
+    'Shikarpur',
+    'Hafizabad',
+    'Kohat',
+    'Jhelum',
+    'Muridke',
+    'Karak',
+    'Khushab',
+    'Dera Ismail Khan',
+    'Chaman'
+  ];
+
+  const eventTypes = [
+    'Wedding',
+    'Wedding Reception',
+    'Engagement Ceremony',
+    'Mehndi Event',
+    'Baraat Ceremony',
+    'Walima',
+    'Birthday Party',
+    'Anniversary Celebration',
+    'Corporate Event',
+    'Corporate Meeting',
+    'Conference',
+    'Seminar',
+    'Workshop',
+    'Business Launch',
+    'Product Launch',
+    'Team Building Event',
+    'Networking Event',
+    'Trade Show',
+    'Exhibition',
+    'Awards Ceremony',
+    'Gala Dinner',
+    'Charity Event',
+    'Fundraiser',
+    'Graduation Party',
+    'Baby Shower',
+    'Bridal Shower',
+    'Cocktail Party',
+    'Dinner Party',
+    'Lunch Event',
+    'Breakfast Meeting',
+    'Social Gathering',
+    'Family Reunion',
+    'Festival Celebration',
+    'Religious Event',
+    'Cultural Event',
+    'Music Concert',
+    'Art Exhibition',
+    'Fashion Show',
+    'Sports Event',
+    'Outdoor Event',
+    'Beach Party',
+    'Garden Party',
+    'Picnic',
+    'BBQ Event',
+    'Retirement Party',
+    'Farewell Party',
+    'Welcome Party',
+    'Holiday Party',
+    'New Year Party',
+    'Christmas Party'
   ];
 
   return (
@@ -72,7 +227,7 @@ const HeroSection = () => {
             <div className="bg-white rounded-lg shadow-lg border border-gray-200">
               <form onSubmit={handleSearch} className="flex flex-col md:flex-row md:flex-nowrap md:items-end">
                 {/* Event Type */}
-                <div className="flex-[2] border-b md:border-b-0 md:border-r border-gray-200 px-6 py-4">
+                <div ref={eventTypeRef} className="flex-[2] border-b md:border-b-0 md:border-r border-gray-200 px-6 py-4 relative">
                   <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
                     Event Type
                   </label>
@@ -85,8 +240,24 @@ const HeroSection = () => {
                       placeholder="What are you planning?"
                       value={searchData.eventType}
                       onChange={(e) => handleInputChange('eventType', e.target.value)}
+                      onFocus={() => setShowEventTypeSuggestions(true)}
                       className="w-full pl-7 pr-2 py-2 text-gray-700 placeholder-gray-400 focus:outline-none text-base"
                     />
+                    
+                    {/* Event Type Suggestions Dropdown */}
+                    {showEventTypeSuggestions && filteredEventTypes.length > 0 && (
+                      <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto z-50">
+                        {filteredEventTypes.map((type, index) => (
+                          <div
+                            key={index}
+                            onClick={() => selectEventType(type)}
+                            className="px-4 py-3 hover:bg-gray-50 cursor-pointer text-gray-700 border-b border-gray-100 last:border-b-0 transition-colors"
+                          >
+                            {type}
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -111,7 +282,7 @@ const HeroSection = () => {
                 </div>
 
                 {/* Location */}
-                <div className="flex-1 border-b md:border-b-0 px-5 py-4">
+                <div ref={locationRef} className="flex-1 border-b md:border-b-0 px-5 py-4 relative">
                   <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
                     Location
                   </label>
@@ -120,15 +291,29 @@ const HeroSection = () => {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                     </svg>
-                    <select
+                    <input
+                      type="text"
+                      placeholder="City"
                       value={searchData.location}
                       onChange={(e) => handleInputChange('location', e.target.value)}
-                      className="w-full pl-7 pr-2 py-2 text-gray-700 focus:outline-none appearance-none bg-transparent cursor-pointer text-base"
-                    >
-                      {locations.map(location => (
-                        <option key={location} value={location}>{location}</option>
-                      ))}
-                    </select>
+                      onFocus={() => setShowLocationSuggestions(true)}
+                      className="w-full pl-7 pr-2 py-2 text-gray-700 placeholder-gray-400 focus:outline-none text-base"
+                    />
+                    
+                    {/* Location Suggestions Dropdown */}
+                    {showLocationSuggestions && filteredLocations.length > 0 && (
+                      <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto z-50">
+                        {filteredLocations.map((city, index) => (
+                          <div
+                            key={index}
+                            onClick={() => selectLocation(city)}
+                            className="px-4 py-3 hover:bg-gray-50 cursor-pointer text-gray-700 border-b border-gray-100 last:border-b-0 transition-colors"
+                          >
+                            {city}
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </div>
                 
