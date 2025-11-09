@@ -8,6 +8,8 @@ import Signup from './components/auth/Signup';
 import ProfilePage from './components/profile/ProfilePage';
 import ListingsPage from './components/listing/ListingsPage';
 import ListingDetail from './components/listing/ListingDetail';
+import AddSpaceWizard from './components/vendor/AddSpace/AddSpaceWizard';
+import VendorDashboard from './components/vendor/VendorDashboard';
 import { AuthContext, AuthProvider } from './contexts/AuthContext';  
 
 function App() {
@@ -23,6 +25,10 @@ function App() {
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/venues" element={<ListingsPage />} />
             <Route path="/venues/:id" element={<ListingDetail />} />
+            
+            {/* Vendor Routes */}
+            <Route path="/vendor/dashboard" element={<VendorDashboard />} />
+            <Route path="/vendor/add-space" element={<AddSpaceWizard />} />
           </Routes>
         </div>
       </Router>

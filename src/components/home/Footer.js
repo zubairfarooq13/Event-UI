@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { 
   FaCalendarAlt, 
   FaPhone, 
@@ -64,9 +65,9 @@ const Footer = () => {
                 </a>
               </li>
               <li>
-                <a href="#" className="text-gray-300 hover:text-white transition-colors duration-200">
+                <Link to="/vendor/add-space" className="text-gray-300 hover:text-white transition-colors duration-200">
                   List Your Venue
-                </a>
+                </Link>
               </li>
               <li>
                 <a href="#" className="text-gray-300 hover:text-white transition-colors duration-200">

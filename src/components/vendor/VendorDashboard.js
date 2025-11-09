@@ -1,10 +1,5 @@
 import React, { useState } from 'react';
-import VendorSidebar from './VendorSidebar';
 import VendorDashboardHome from './VendorDashboardHome';
-import VendorPhotos from './VendorPhotos';
-import VendorPackages from './VendorPackages';
-import VendorAvailability from './VendorAvailability';
-import VendorBookings from './VendorBookings';
 
 const VendorDashboard = ({ onLogout }) => {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -26,14 +21,6 @@ const VendorDashboard = ({ onLogout }) => {
     switch (activeTab) {
       case 'dashboard':
         return <VendorDashboardHome />;
-      case 'photos':
-        return <VendorPhotos />;
-      case 'packages':
-        return <VendorPackages />;
-      case 'availability':
-        return <VendorAvailability />;
-      case 'bookings':
-        return <VendorBookings />;
       default:
         return <VendorDashboardHome />;
     }
@@ -41,12 +28,6 @@ const VendorDashboard = ({ onLogout }) => {
 
   return (
     <div className="flex h-screen bg-gray-50">
-      {/* Sidebar */}
-      <VendorSidebar
-        activeTab={activeTab}
-        setActiveTab={setActiveTab}
-        onLogout={handleLogout}
-      />
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col overflow-hidden lg:ml-0">

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { 
   FaTachometerAlt, 
   FaImages, 
@@ -9,7 +10,9 @@ import {
   FaBars, 
   FaTimes,
   FaChevronLeft,
-  FaChevronRight
+  FaChevronRight,
+  FaPlus,
+  FaBuilding
 } from 'react-icons/fa';
 
 const VendorSidebar = ({ activeTab, setActiveTab, onLogout }) => {
@@ -22,6 +25,12 @@ const VendorSidebar = ({ activeTab, setActiveTab, onLogout }) => {
       label: 'Dashboard', 
       icon: FaTachometerAlt, 
       color: 'text-blue-600' 
+    },
+    { 
+      key: 'spaces', 
+      label: 'My Spaces', 
+      icon: FaBuilding, 
+      color: 'text-teal-600' 
     },
     { 
       key: 'photos', 
@@ -110,6 +119,17 @@ const VendorSidebar = ({ activeTab, setActiveTab, onLogout }) => {
               <FaChevronLeft size={14} className="text-gray-500" />
             )}
           </button>
+        </div>
+
+        {/* Add Space Button */}
+        <div className="mt-4 px-2">
+          <Link
+            to="/vendor/add-space"
+            className="w-full flex items-center justify-center space-x-2 px-3 py-3 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors font-medium shadow-sm"
+          >
+            <FaPlus size={16} />
+            {!isCollapsed && <span>Add New Space</span>}
+          </Link>
         </div>
 
         {/* Navigation Items */}

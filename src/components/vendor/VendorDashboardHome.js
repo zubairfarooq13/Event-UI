@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { 
   FaCalendarCheck, 
   FaCalendarTimes, 
@@ -9,7 +10,8 @@ import {
   FaArrowDown,
   FaImages,
   FaBox,
-  FaBookOpen
+  FaBookOpen,
+  FaPlus
 } from 'react-icons/fa';
 import { 
   BarChart, 
@@ -110,7 +112,14 @@ const VendorDashboardHome = () => {
           <p className="text-gray-600 mt-1">Welcome back! Here's what's happening with your venue.</p>
         </div>
         <div className="flex items-center gap-3">
-          <button className="flex items-center gap-2 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors">
+          <Link 
+            to="/vendor/add-space"
+            className="flex items-center gap-2 px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors font-medium"
+          >
+            <FaPlus size={16} />
+            Add New Space
+          </Link>
+          <button className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
             <FaEye size={16} />
             View Profile
           </button>
