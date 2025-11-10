@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaCheck } from 'react-icons/fa';
+import spaceService from '../../../services/spaceService';
 import OverviewStep from './steps/OverviewStep';
 import DetailsStep from './steps/DetailsStep';
 import CapacityStep from './steps/CapacityStep';
@@ -160,22 +161,12 @@ const AddSpaceWizard = () => {
 
       console.log('Submitting space data:', payload);
       
-      // Make API call to create space
-      const response = await fetch('/api/vendor/spaces', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          // Add authorization header if needed
-          // 'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(payload)
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to submit space');
+      // Make API call using spaceService
+      const result = await spaceService.createSpace(payload);
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to submit space');
       }
-
-      const result = await response.json();
       
       // Clear localStorage draft on success
       localStorage.removeItem('space_draft');
@@ -208,7 +199,7 @@ const AddSpaceWizard = () => {
       
     } catch (error) {
       console.error('Error submitting space:', error);
-      alert('Failed to submit space. Please try again.');
+      alert(error.message || 'Failed to submit space. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
