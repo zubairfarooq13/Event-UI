@@ -13,44 +13,55 @@ import ReviewStep from './steps/ReviewStep';
 const AddSpaceWizard = () => {
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(0);
-  const [spaceData, setSpaceData] = useState({
-    // Overview
-    name: '',
-    venue_type: [],
-    city: '',
-    location: '',
-    
-    // Details
-    description: '',
-    venue_name: '',
-    
-    // Capacity
-    capacity: '',
-    capacities: {
-      standing: '',
-      dining: '',
-      theatre: '',
-      boardroom: '',
-      classroom: '',
-      reception: ''
-    },
-    
-    // Facilities
-    facilities: [],
-    catering_drinks: [],
-    music_sound: [],
-    
-    // Pricing
-    pricing: [],
-    packages: [],
-    
-    // Photos
-    photos: [],
-    
-    // Rules
-    allowed_events: [],
-    house_rules: [],
-    cancellation_policy: ''
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // Initialize state from localStorage (for draft recovery) or empty
+  const [spaceData, setSpaceData] = useState(() => {
+    const savedDraft = localStorage.getItem('space_draft');
+    if (savedDraft) {
+      return JSON.parse(savedDraft);
+    }
+    return {
+      // Overview
+      name: '',
+      venue_type: [],
+      city: '',
+      location: '',
+      
+      // Details
+      description: '',
+      venue_name: '',
+      business_phone: '',
+      business_email: '',
+      
+      // Capacity
+      capacity: '',
+      capacities: {
+        standing: '',
+        dining: '',
+        theatre: '',
+        boardroom: '',
+        classroom: '',
+        reception: ''
+      },
+      
+      // Facilities
+      facilities: [],
+      catering_drinks: [],
+      music_sound: [],
+      
+      // Pricing
+      pricing: [],
+      packages: [],
+      
+      // Photos
+      photos: [],
+      
+      // Rules
+      allowed_events: [],
+      house_rules: [],
+      cancellation_policy: ''
+    };
   });
 
   const steps = [
@@ -63,6 +74,11 @@ const AddSpaceWizard = () => {
     { id: 6, title: 'Rules', component: RulesStep },
     { id: 7, title: 'Review', component: ReviewStep }
   ];
+
+  // Save to localStorage whenever spaceData changes (auto-save draft)
+  React.useEffect(() => {
+    localStorage.setItem('space_draft', JSON.stringify(spaceData));
+  }, [spaceData]);
 
   const handleNext = () => {
     if (currentStep < steps.length - 1) {
@@ -90,24 +106,146 @@ const AddSpaceWizard = () => {
   };
 
   const handleSubmit = async () => {
+    setIsSubmitting(true);
     try {
-      console.log('Submitting space data:', spaceData);
-      // TODO: Make API call to submit space
-      // const response = await spaceService.createSpace(spaceData);
+      // Prepare data for backend
+      const payload = {
+        // Basic Info
+        name: spaceData.name,
+        venue_type: spaceData.venue_type,
+        city: spaceData.city,
+        address: spaceData.location,
+        
+        // Details
+        business_name: spaceData.venue_name,
+        description: spaceData.description,
+        business_phone: spaceData.business_phone,
+        business_email: spaceData.business_email,
+        
+        // Capacity
+        capacity: parseInt(spaceData.capacity) || 0,
+        capacities: Object.entries(spaceData.capacities)
+          .filter(([key, value]) => value)
+          .reduce((acc, [key, value]) => {
+            acc[key] = parseInt(value);
+            return acc;
+          }, {}),
+        
+        // Facilities (combine all categories)
+        facilities: [
+          ...spaceData.facilities.map(f => ({ name: f, category: 'general' })),
+          ...spaceData.catering_drinks.map(f => ({ name: f, category: 'catering' })),
+          ...spaceData.music_sound.map(f => ({ name: f, category: 'music' }))
+        ],
+        
+        // Pricing & Packages
+        pricing: spaceData.pricing,
+        packages: spaceData.packages,
+        
+        // Photos
+        photos: spaceData.photos.map((photo, index) => ({
+          photo_url: photo.photo_url,
+          display_order: index,
+          is_primary: index === 0
+        })),
+        
+        // Rules
+        allowed_events: spaceData.allowed_events,
+        house_rules: spaceData.house_rules,
+        cancellation_policy: spaceData.cancellation_policy,
+        
+        // Status
+        status: 'pending_review'
+      };
+
+      console.log('Submitting space data:', payload);
+      
+      // Make API call to create space
+      const response = await fetch('/api/vendor/spaces', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          // Add authorization header if needed
+          // 'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(payload)
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to submit space');
+      }
+
+      const result = await response.json();
+      
+      // Clear localStorage draft on success
+      localStorage.removeItem('space_draft');
+      
+      // Clear state
+      setSpaceData({
+        name: '',
+        venue_type: [],
+        city: '',
+        location: '',
+        description: '',
+        venue_name: '',
+        business_phone: '',
+        business_email: '',
+        capacity: '',
+        capacities: {},
+        facilities: [],
+        catering_drinks: [],
+        music_sound: [],
+        pricing: [],
+        packages: [],
+        photos: [],
+        allowed_events: [],
+        house_rules: [],
+        cancellation_policy: ''
+      });
       
       alert('Space submitted successfully! It will be reviewed by our team.');
       navigate('/vendor/dashboard');
+      
     } catch (error) {
       console.error('Error submitting space:', error);
       alert('Failed to submit space. Please try again.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   const handleSaveAndExit = () => {
-    // Save draft to localStorage or backend
-    localStorage.setItem('space_draft', JSON.stringify(spaceData));
-    alert('Progress saved!');
+    // Draft is already saved in localStorage (auto-save)
+    alert('Your progress has been saved! You can continue later from where you left off.');
     navigate('/vendor/dashboard');
+  };
+
+  const handleClearDraft = () => {
+    if (window.confirm('Are you sure you want to discard this draft?')) {
+      localStorage.removeItem('space_draft');
+      setSpaceData({
+        name: '',
+        venue_type: [],
+        city: '',
+        location: '',
+        description: '',
+        venue_name: '',
+        business_phone: '',
+        business_email: '',
+        capacity: '',
+        capacities: {},
+        facilities: [],
+        catering_drinks: [],
+        music_sound: [],
+        pricing: [],
+        packages: [],
+        photos: [],
+        allowed_events: [],
+        house_rules: [],
+        cancellation_policy: ''
+      });
+      navigate('/vendor/dashboard');
+    }
   };
 
   const CurrentStepComponent = steps[currentStep].component;
@@ -182,29 +320,53 @@ const AddSpaceWizard = () => {
 
         {/* Navigation Buttons */}
         <div className="flex items-center justify-between mt-8 pt-8 border-t border-gray-200">
-          <button
-            onClick={handlePrevious}
-            disabled={currentStep === 0}
-            className={`px-6 py-3 rounded-lg font-medium transition-colors ${
-              currentStep === 0
-                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
-            }`}
-          >
-            Previous
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={handlePrevious}
+              disabled={currentStep === 0 || isSubmitting}
+              className={`px-6 py-3 rounded-lg font-medium transition-colors ${
+                currentStep === 0 || isSubmitting
+                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                  : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+              }`}
+            >
+              Previous
+            </button>
+            
+            <button
+              onClick={handleClearDraft}
+              disabled={isSubmitting}
+              className={`px-4 py-3 text-sm font-medium transition-colors ${
+                isSubmitting
+                  ? 'text-gray-400 cursor-not-allowed'
+                  : 'text-red-600 hover:text-red-700'
+              }`}
+            >
+              Clear Draft
+            </button>
+          </div>
 
           {currentStep === steps.length - 1 ? (
             <button
               onClick={handleSubmit}
-              className="px-8 py-3 bg-teal-600 text-white rounded-lg font-medium hover:bg-teal-700 transition-colors"
+              disabled={isSubmitting}
+              className={`px-8 py-3 bg-teal-600 text-white rounded-lg font-medium transition-colors ${
+                isSubmitting
+                  ? 'opacity-50 cursor-not-allowed'
+                  : 'hover:bg-teal-700'
+              }`}
             >
-              Submit Space
+              {isSubmitting ? 'Submitting...' : 'Submit Space'}
             </button>
           ) : (
             <button
               onClick={handleNext}
-              className="px-8 py-3 bg-teal-600 text-white rounded-lg font-medium hover:bg-teal-700 transition-colors"
+              disabled={isSubmitting}
+              className={`px-8 py-3 bg-teal-600 text-white rounded-lg font-medium transition-colors ${
+                isSubmitting
+                  ? 'opacity-50 cursor-not-allowed'
+                  : 'hover:bg-teal-700'
+              }`}
             >
               Next Step
             </button>
