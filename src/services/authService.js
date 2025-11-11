@@ -11,6 +11,9 @@ class AuthService {
       if (response.data && response.data.data) {
         const { access_token, refresh_token, user } = response.data.data;
         
+        // Set the auth token in localStorage for subsequent requests
+        setAuthToken(access_token);
+        
         return {
           success: true,
           data: { 
@@ -41,6 +44,9 @@ class AuthService {
       if (response.data && response.data.data) {
         const { access_token, refresh_token, user } = response.data.data;
         
+        // Set the auth token in localStorage for subsequent requests
+        setAuthToken(access_token);
+        
         return {
           success: true,
           data: { 
@@ -63,99 +69,6 @@ class AuthService {
     }
   }
 
-  // Vendor Authentication
-  async loginVendor(credentials) {
-    try {
-      const response = await apiClient.post('/api/auth/vendor/login', credentials);
-      
-      // Handle the response structure from your backend
-      if (response.data && response.data.data) {
-        const { access_token, refresh_token, user } = response.data.data;
-        
-        return {
-          success: true,
-          data: { 
-            token: access_token,
-            refreshToken: refresh_token,
-            user: user,
-            role: user.role || 'vendor'
-          },
-          message: response.data.message || 'Login successful'
-        };
-      } else {
-        throw new Error('Invalid response format');
-      }
-    } catch (error) {
-      return {
-        success: false,
-        message: error.response?.data?.message || error.message || 'Login failed',
-        error: error.response?.data?.errors || null
-      };
-    }
-  }
-
-  async signupVendor(vendorData) {
-    try {
-      const response = await apiClient.post('/api/auth/vendor/signup', vendorData);
-      
-      // Handle the response structure from your backend
-      if (response.data && response.data.data) {
-        const { access_token, refresh_token, user } = response.data.data;
-        
-        return {
-          success: true,
-          data: { 
-            token: access_token,
-            refreshToken: refresh_token,
-            user: user,
-            role: user.role || 'vendor'
-          },
-          message: response.data.message || 'Vendor registration successful. Please wait for approval.'
-        };
-      } else {
-        throw new Error('Invalid response format');
-      }
-    } catch (error) {
-      return {
-        success: false,
-        message: error.response?.data?.message || error.message || 'Vendor signup failed',
-        error: error.response?.data?.errors || null
-      };
-    }
-  }
-
-  // Admin Authentication
-  async loginAdmin(credentials) {
-    try {
-      const response = await apiClient.post('/api/auth/admin/login', credentials);
-      
-      // Handle the response structure from your backend
-      if (response.data && response.data.data) {
-        const { access_token, refresh_token, user } = response.data.data;
-        
-        return {
-          success: true,
-          data: { 
-            token: access_token,
-            refreshToken: refresh_token,
-            user: user,
-            role: user.role || 'admin'
-          },
-          message: response.data.message || 'Admin login successful'
-        };
-      } else {
-        throw new Error('Invalid response format');
-      }
-    } catch (error) {
-      return {
-        success: false,
-        message: error.response?.data?.message || error.message || 'Admin login failed',
-        error: error.response?.data?.errors || null
-      };
-    }
-  }
-
-  // Common Authentication Methods
   async logout() {
     try {
       // Call backend logout endpoint (optional)
@@ -179,6 +92,9 @@ class AuthService {
       // Handle the response structure from your backend
       if (response.data && response.data.data) {
         const { access_token, refresh_token, user } = response.data.data;
+        
+        // Set the new auth token in localStorage
+        setAuthToken(access_token);
         
         return {
           success: true,
@@ -328,41 +244,6 @@ class AuthService {
       return {
         success: false,
         message: error.response?.data?.message || 'Password change failed',
-        error: error.response?.data?.errors || null
-      };
-    }
-  }
-
-  // OTP Verification
-  async sendOTP(phone) {
-    try {
-      const response = await apiClient.post('/api/auth/send-otp', { phone });
-      return {
-        success: true,
-        data: response.data,
-        message: 'OTP sent successfully'
-      };
-    } catch (error) {
-      return {
-        success: false,
-        message: error.response?.data?.message || 'Failed to send OTP',
-        error: error.response?.data?.errors || null
-      };
-    }
-  }
-
-  async verifyOTP(phone, otp) {
-    try {
-      const response = await apiClient.post('/api/auth/verify-otp', { phone, otp });
-      return {
-        success: true,
-        data: response.data,
-        message: 'OTP verified successfully'
-      };
-    } catch (error) {
-      return {
-        success: false,
-        message: error.response?.data?.message || 'OTP verification failed',
         error: error.response?.data?.errors || null
       };
     }

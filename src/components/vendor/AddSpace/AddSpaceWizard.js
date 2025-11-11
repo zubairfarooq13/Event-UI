@@ -109,54 +109,80 @@ const AddSpaceWizard = () => {
   const handleSubmit = async () => {
     setIsSubmitting(true);
     try {
-      // Prepare data for backend
+      // Prepare data for backend - matching exact API structure
+      // API Endpoint: POST /api/spaces/
+      // Expected format matches the backend schema exactly
       const payload = {
-        // Basic Info
-        name: spaceData.name,
-        venue_type: spaceData.venue_type,
+        venue_name: spaceData.venue_name || spaceData.name,
+        venue_type: Array.isArray(spaceData.venue_type) 
+          ? spaceData.venue_type.join(', ') 
+          : spaceData.venue_type,
+        location: spaceData.location,
         city: spaceData.city,
-        address: spaceData.location,
-        
-        // Details
-        business_name: spaceData.venue_name,
         description: spaceData.description,
-        business_phone: spaceData.business_phone,
-        business_email: spaceData.business_email,
-        
-        // Capacity
         capacity: parseInt(spaceData.capacity) || 0,
-        capacities: Object.entries(spaceData.capacities)
-          .filter(([key, value]) => value)
-          .reduce((acc, [key, value]) => {
-            acc[key] = parseInt(value);
-            return acc;
-          }, {}),
+        phone: spaceData.business_phone,
+        email: spaceData.business_email,
         
-        // Facilities (combine all categories)
+        // Photos array with photo_url and is_primary
+        photos: spaceData.photos && spaceData.photos.length > 0
+          ? spaceData.photos.map((photo, index) => ({
+              photo_url: photo.photo_url || photo,
+              is_primary: index === 0
+            }))
+          : [],
+        
+        // Capacities array with capacity_type and capacity_value
+        capacities: Object.entries(spaceData.capacities || {})
+          .filter(([key, value]) => value)
+          .map(([capacity_type, capacity_value]) => ({
+            capacity_type,
+            capacity_value: parseInt(capacity_value)
+          })),
+        
+        // Facilities array with name and category
         facilities: [
-          ...spaceData.facilities.map(f => ({ name: f, category: 'general' })),
-          ...spaceData.catering_drinks.map(f => ({ name: f, category: 'catering' })),
-          ...spaceData.music_sound.map(f => ({ name: f, category: 'music' }))
+          ...(spaceData.facilities || []).map(f => ({ 
+            name: f, 
+            category: 'general' 
+          })),
+          ...(spaceData.catering_drinks || []).map(f => ({ 
+            name: f, 
+            category: 'catering' 
+          })),
+          ...(spaceData.music_sound || []).map(f => ({ 
+            name: f, 
+            category: 'music' 
+          }))
         ],
         
-        // Pricing & Packages
-        pricing: spaceData.pricing,
-        packages: spaceData.packages,
-        
-        // Photos
-        photos: spaceData.photos.map((photo, index) => ({
-          photo_url: photo.photo_url,
-          display_order: index,
-          is_primary: index === 0
+        // Pricing array with pricing_type and price
+        pricing: (spaceData.pricing || []).map(p => ({
+          pricing_type: p.period_type || p.pricing_type || 'hourly',
+          price: parseFloat(p.amount || p.price || 0)
         })),
         
-        // Rules
-        allowed_events: spaceData.allowed_events,
-        house_rules: spaceData.house_rules,
-        cancellation_policy: spaceData.cancellation_policy,
+        // Packages array with name, price, and features
+        packages: (spaceData.packages || []).map(pkg => ({
+          name: pkg.name,
+          price: parseFloat(pkg.price || 0),
+          features: pkg.features || []
+        })),
         
-        // Status
-        status: 'pending_review'
+        // Rules array with rule_type and rule_text
+        rules: [
+          ...(spaceData.house_rules || []).map(rule => ({
+            rule_type: 'house_rule',
+            rule_text: rule
+          })),
+          ...(spaceData.cancellation_policy ? [{
+            rule_type: 'cancellation_policy',
+            rule_text: spaceData.cancellation_policy
+          }] : [])
+        ],
+        
+        // Allowed events array
+        allowed_events: spaceData.allowed_events || []
       };
 
       console.log('Submitting space data:', payload);
