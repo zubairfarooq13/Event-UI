@@ -10,7 +10,18 @@ const ListingsPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
-  const [listings, setListings] = useState([]);
+  
+  // Dummy card that always displays
+  const dummyCard = {
+    id: 'dummy-1',
+    name: 'Sample Event Space',
+    city: 'Karachi',
+    capacity: 200,
+    price: 75000,
+    photo: 'https://images.unsplash.com/photo-1519167758481-83f29da8fd49?w=800&auto=format&fit=crop'
+  };
+  
+  const [listings, setListings] = useState([dummyCard]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currentFilters, setCurrentFilters] = useState({});
@@ -38,7 +49,8 @@ const ListingsPage = () => {
             photo: venue.photos?.[0]?.photo_url || venue.photo || venue.image || 'https://placehold.co/400x300/3B82F6/FFFFFF?text=Venue'
           }));
           
-          setListings(transformedListings);
+          // Always include dummy card along with real results
+          setListings([dummyCard, ...transformedListings]);
           
           // Store current filters from URL params
           setCurrentFilters({
@@ -100,7 +112,8 @@ const ListingsPage = () => {
             photo: venue.photos?.[0]?.photo_url || venue.photo || venue.image || 'https://placehold.co/400x300/3B82F6/FFFFFF?text=Venue'
           }));
           
-          setListings(transformedListings);
+          // Always include dummy card along with real results
+          setListings([dummyCard, ...transformedListings]);
         } else {
           setError('Failed to load venues');
         }

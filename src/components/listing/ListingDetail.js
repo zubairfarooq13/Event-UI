@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { FaStar, FaMapMarkerAlt, FaHeart, FaShare } from 'react-icons/fa';
 import { MdPeople } from 'react-icons/md';
+import { spaceService } from '../../services';
 import ImageGallery from './ImageGallery';
 import BookingSidebar from './BookingSidebar';
 import PricingSection from './PricingSection';
@@ -12,9 +13,206 @@ import LandingHeader from '../landing/LandingHeader';
 
 const ListingDetail = () => {
   const { id } = useParams();
+  const [venue, setVenue] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // Mock data - replace with actual API call
-  const venue = {
+  useEffect(() => {
+    const fetchSpaceDetails = async () => {
+      setLoading(true);
+      setError(null);
+      
+      try {
+        // Check if it's the dummy card
+        if (id === 'dummy-1') {
+          // Set dummy venue data
+          setVenue({
+            id: 'dummy-1',
+            name: 'Sample Event Space',
+            venueName: 'Sample Venue Management',
+            location: 'Main Boulevard, Gulberg III, Lahore',
+            city: 'Karachi',
+            rating: 4.8,
+            reviewCount: 125,
+            capacity: 200,
+            images: [
+              'https://images.unsplash.com/photo-1519167758481-83f29da8fd49?w=1200&auto=format&fit=crop',
+              'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=1200&auto=format&fit=crop',
+              'https://images.unsplash.com/photo-1511578314322-379afb476865?w=1200&auto=format&fit=crop',
+              'https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?w=1200&auto=format&fit=crop',
+            ],
+            description: `Experience luxury and elegance at our premier event space. This stunning venue offers a perfect blend of modern amenities and classic charm, making it ideal for weddings, corporate events, and special celebrations.
+
+With high ceilings, elegant décor, and state-of-the-art facilities, we provide everything you need to make your event unforgettable. Our professional team is dedicated to ensuring every detail is perfect.`,
+            
+            capacities: {
+              standing: 250,
+              dining: 200,
+              theatre: 180,
+              boardroom: 40,
+              classroom: 120,
+              reception: 220,
+            },
+
+            facilities: [
+              { name: 'Free Wi-Fi', available: true },
+              { name: 'Air Conditioning', available: true },
+              { name: 'Parking', available: true },
+              { name: 'Sound System', available: true },
+              { name: 'Projector & Screen', available: true },
+              { name: 'Stage', available: true },
+            ],
+
+            cateringDrinks: [
+              { name: 'In-house Catering', available: true },
+              { name: 'External Caterers Allowed', available: true },
+              { name: 'Licensed Bar', available: true },
+            ],
+
+            musicSound: [
+              { name: 'PA System', available: true },
+              { name: 'Microphones', available: true },
+              { name: 'DJ Equipment', available: true },
+            ],
+
+            rules: {
+              allowedEvents: ['Weddings', 'Corporate Events', 'Birthday Parties', 'Conferences'],
+              hostRules: [
+                'No smoking indoors',
+                'Music must end by 11 PM',
+                'Respect venue property',
+              ],
+              cancellationPolicy: 'Full refund if cancelled 7 days before event.',
+            },
+
+            pricing: [
+              { day: 'Hourly Rate', hours: 'Per hour', price: 'Rs 15,000', type: 'Base rate' },
+              { day: 'Half Day', hours: '4 hours', price: 'Rs 50,000', type: 'Package rate' },
+              { day: 'Full Day', hours: '8 hours', price: 'Rs 90,000', type: 'Package rate' },
+            ],
+
+            packages: [
+              {
+                id: 1,
+                name: 'Basic Package',
+                price: 'Rs 50,000',
+                description: 'Perfect for small gatherings',
+                features: ['Venue for 4 hours', 'Basic decoration', 'Seating for 100'],
+                popular: false,
+              },
+              {
+                id: 2,
+                name: 'Premium Package',
+                price: 'Rs 100,000',
+                description: 'Ideal for medium events',
+                features: ['Venue for 6 hours', 'Premium decoration', 'Seating for 200', 'Sound system'],
+                popular: true,
+              },
+            ],
+
+            host: {
+              name: 'Sample Host',
+              initials: 'SH',
+              responseRate: '99%',
+              responseTime: '1 hour',
+              about: 'Professional event space host with years of experience.',
+            },
+          });
+          setLoading(false);
+          return;
+        }
+        
+        const result = await spaceService.getSpaceById(id);
+        
+        if (result.success) {
+          const spaceData = result.data?.data || result.data;
+          
+          // Transform API data to component format
+          const transformedVenue = {
+            id: spaceData.space_id || spaceData.id,
+            name: spaceData.venue_name || spaceData.name || 'Unnamed Venue',
+            venueName: spaceData.business_name || spaceData.venue_name,
+            location: spaceData.address || spaceData.location || 'Unknown Location',
+            city: spaceData.city,
+            rating: spaceData.average_rating || 4.5,
+            reviewCount: spaceData.total_reviews || 0,
+            capacity: spaceData.capacity || 100,
+            images: spaceData.photos?.map(p => p.photo_url || p) || [
+              'https://placehold.co/800x600/3B82F6/FFFFFF?text=Venue+Image'
+            ],
+            description: spaceData.description || 'No description available.',
+            
+            capacities: spaceData.capacities?.reduce((acc, cap) => {
+              acc[cap.capacity_type] = cap.capacity_value;
+              return acc;
+            }, {}) || {},
+
+            facilities: spaceData.facilities?.filter(f => f.category === 'general').map(f => ({
+              name: f.name,
+              available: true,
+            })) || [],
+
+            cateringDrinks: spaceData.facilities?.filter(f => f.category === 'catering').map(f => ({
+              name: f.name,
+              available: true,
+            })) || [],
+
+            musicSound: spaceData.facilities?.filter(f => f.category === 'music').map(f => ({
+              name: f.name,
+              available: true,
+            })) || [],
+
+            rules: {
+              allowedEvents: Array.isArray(spaceData.allowed_events) 
+                ? spaceData.allowed_events.map(e => typeof e === 'string' ? e : e.event_type || e.name || String(e))
+                : [],
+              hostRules: spaceData.rules?.filter(r => r.rule_type === 'house_rule').map(r => r.rule_text) || [],
+              cancellationPolicy: spaceData.rules?.find(r => r.rule_type === 'cancellation_policy')?.rule_text || 'No cancellation policy specified.',
+            },
+
+            pricing: spaceData.pricing?.map(p => ({
+              day: p.pricing_type || p.period_type || 'General',
+              hours: 'Available',
+              price: `Rs ${p.price?.toLocaleString() || '0'}`,
+              type: p.description || `${p.pricing_type || 'rental'} fee`,
+            })) || [],
+            packages: spaceData.packages?.map(pkg => ({
+              id: pkg.package_id || pkg.id,
+              name: pkg.name,
+              price: `Rs ${pkg.price?.toLocaleString() || '0'}`,
+              description: pkg.description || '',
+              features: Array.isArray(pkg.features) 
+                ? pkg.features.map(f => typeof f === 'string' ? f : f.feature_text || f.name || String(f))
+                : [],
+              popular: pkg.is_popular || false,
+            })) || [],
+
+            host: {
+              name: spaceData.vendor_name || 'Host',
+              initials: (spaceData.vendor_name || 'H').substring(0, 2).toUpperCase(),
+              responseRate: '99%',
+              responseTime: '1 hour',
+              about: `Your host at ${spaceData.venue_name || 'this venue'}.`,
+            },
+          };
+          
+          setVenue(transformedVenue);
+        } else {
+          setError(result.error || 'Failed to load space details');
+        }
+      } catch (err) {
+        console.error('Error fetching space details:', err);
+        setError('Failed to load space details');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchSpaceDetails();
+  }, [id]);
+
+  // Mock data fallback for development
+  const mockVenue = {
     id: id,
     name: 'The Bedouin Tent Garden',
     venueName: "St Ethelburga's Centre",
@@ -110,10 +308,62 @@ The venue features beautiful fabric draping, comfortable seating arrangements, a
     // Implement wishlist logic
   };
 
-  return (
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <LandingHeader />
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-600 mx-auto mb-4"></div>
+            <p className="text-gray-500">Loading space details...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <LandingHeader />
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <div className="text-center">
+            <div className="text-red-500 text-xl mb-4">⚠️</div>
+            <p className="text-red-600 font-medium mb-4">{error}</p>
+            <Link 
+              to="/venues"
+              className="bg-teal-600 text-white px-6 py-2 rounded-lg hover:bg-teal-700 transition-colors inline-block"
+            >
+              Back to Venues
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!venue) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <LandingHeader />
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <div className="text-center">
+            <p className="text-gray-600 mb-4">Space not found</p>
+            <Link 
+              to="/venues"
+              className="bg-teal-600 text-white px-6 py-2 rounded-lg hover:bg-teal-700 transition-colors inline-block"
+            >
+              Back to Venues
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
     <div className="min-h-screen bg-gray-50">
-          <LandingHeader />
+      <LandingHeader />
       {/* Breadcrumb */}
       <div className="bg-white border-b border-gray-200 mt-16">
         <div className="max-w-[1600px] mx-auto px-4 py-3">
@@ -190,10 +440,10 @@ The venue features beautiful fabric draping, comfortable seating arrangements, a
             </div>
 
             {/* Pricing */}
-            <PricingSection />
+            <PricingSection pricing={venue.pricing} />
 
             {/* Packages & Offers */}
-            <PackagesSection />  
+            <PackagesSection packages={venue.packages} />  
 
             {/* Catering & Drinks */}
             <AmenitiesSection 
