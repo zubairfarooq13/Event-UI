@@ -27,6 +27,43 @@ class SpaceService {
   }
 
   /**
+   * Search spaces with filters
+   * @param {Object} filters - Search filters (eventType, capacity, city)
+   * @param {number} page - Page number
+   * @param {number} perPage - Items per page
+   * @returns {Promise<Object>} Response with search results
+   */
+  async searchSpaces(filters = {}, page = 1, perPage = 20) {
+    try {
+      const queryParams = new URLSearchParams();
+      
+      // Add search filters
+      if (filters.eventType) queryParams.append('eventType', filters.eventType);
+      if (filters.capacity) queryParams.append('capacity', filters.capacity);
+      if (filters.city) queryParams.append('city', filters.city);
+      
+      // Add pagination
+      queryParams.append('page', page.toString());
+      queryParams.append('per_page', Math.min(perPage, 100).toString());
+      
+      const response = await apiClient.get(`/api/spaces/search?${queryParams.toString()}`);
+      
+      return {
+        success: true,
+        data: response.data,
+        message: 'Search results fetched successfully'
+      };
+    } catch (error) {
+      console.error('Search spaces error:', error);
+      return {
+        success: false,
+        error: error.response?.data?.message || 'Failed to search spaces',
+        data: []
+      };
+    }
+  }
+
+  /**
    * Get all spaces for the current vendor
    * @param {number} page - Page number
    * @param {number} perPage - Items per page

@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import Header from '../common/Header';
 import ListingCard from './ListingCard';
-import { venueService } from '../../services';
+import { spaceService } from '../../services';
 import LandingHeader from '../landing/LandingHeader';
 import VenueFilters from './VenueFilters';
 
 const ListingsPage = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
   const [listings, setListings] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -20,6 +21,42 @@ const ListingsPage = () => {
       setError(null);
       
       try {
+        // Check if search results were passed from HeroSection
+        const passedResults = location.state?.searchResults;
+        
+        if (passedResults) {
+          console.log('Using pre-loaded search results from HeroSection');
+          
+          // Transform the passed data to match ListingCard expectations
+          const venueData = passedResults?.data?.spaces || passedResults?.spaces || [];
+          const transformedListings = venueData.map((venue) => ({
+            id: venue.id || venue.space_id,
+            name: venue.venue_name || venue.name || 'Unnamed Venue',
+            city: venue.city || venue.location || 'Unknown City',
+            capacity: venue.capacity || venue.max_capacity || 100,
+            price: venue.pricing?.[0]?.price || venue.price || venue.base_price || 50000,
+            photo: venue.photos?.[0]?.photo_url || venue.photo || venue.image || 'https://placehold.co/400x300/3B82F6/FFFFFF?text=Venue'
+          }));
+          
+          setListings(transformedListings);
+          
+          // Store current filters from URL params
+          setCurrentFilters({
+            eventType: searchParams.get('eventType') || '',
+            location: searchParams.get('city') || '',
+            guests: searchParams.get('capacity') || '',
+            date: searchParams.get('date') || '',
+            minPrice: searchParams.get('minPrice') || '',
+            maxPrice: searchParams.get('maxPrice') || '',
+          });
+          
+          setLoading(false);
+          return; // Skip API call since we have results
+        }
+        
+        // No pre-loaded results, fetch from API
+        console.log('No pre-loaded results, fetching from API');
+        
         // Get search filters from URL parameters or localStorage
         const filters = {};
         if (searchParams.get('city')) filters.city = searchParams.get('city');
@@ -48,19 +85,19 @@ const ListingsPage = () => {
           maxPrice: filters.maxPrice || searchParams.get('maxPrice') || '',
         });
 
-        // Call the backend API
-        const result = await venueService.searchVenues(filters, 1, 20);
+        // Call the backend API using spaceService
+        const result = await spaceService.searchSpaces(filters, 1, 20);
         
         if (result.success) {
           // Transform the data to match ListingCard expectations
-          const venueData = result.data?.data?.listings || [];
+          const venueData = result.data?.data?.spaces || result.data?.spaces || [];
           const transformedListings = venueData.map((venue) => ({
-            id: venue.id,
-            name: venue.name || venue.business_name || 'Unnamed Venue',
+            id: venue.id || venue.space_id,
+            name: venue.venue_name || venue.name || 'Unnamed Venue',
             city: venue.city || venue.location || 'Unknown City',
             capacity: venue.capacity || venue.max_capacity || 100,
-            price: venue.min_price || venue.price || venue.base_price || 50000,
-            photo: venue.photos?.[0] || venue.photo || venue.image || 'https://placehold.co/400x300/3B82F6/FFFFFF?text=Venue'
+            price: venue.pricing?.[0]?.price || venue.price || venue.base_price || 50000,
+            photo: venue.photos?.[0]?.photo_url || venue.photo || venue.image || 'https://placehold.co/400x300/3B82F6/FFFFFF?text=Venue'
           }));
           
           setListings(transformedListings);
@@ -76,7 +113,7 @@ const ListingsPage = () => {
     };
 
     fetchVenues();
-  }, [searchParams]);
+  }, [searchParams, location.state]);
 
   const handleViewDetails = (id) => {
     navigate(`/venues/${id}`);

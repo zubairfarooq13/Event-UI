@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import spaceService from '../../services/spaceService';
 
 const HeroSection = () => {
   const navigate = useNavigate();
@@ -11,6 +12,7 @@ const HeroSection = () => {
     guests: '',
     location: ''
   });
+  const [isSearching, setIsSearching] = useState(false);
   const [showEventTypeSuggestions, setShowEventTypeSuggestions] = useState(false);
   const [showLocationSuggestions, setShowLocationSuggestions] = useState(false);
   const [filteredEventTypes, setFilteredEventTypes] = useState([]);
@@ -63,18 +65,55 @@ const HeroSection = () => {
     setFilteredLocations([]);
   };
 
-  const handleSearch = (e) => {
+  const handleSearch = async (e) => {
     e.preventDefault();
     console.log('Searching with:', searchData);
     
-    // Build query parameters
-    const params = new URLSearchParams();
-    if (searchData.eventType) params.append('eventType', searchData.eventType);
-    if (searchData.guests) params.append('capacity', searchData.guests);
-    if (searchData.location) params.append('city', searchData.location);
+    setIsSearching(true);
     
-    // Navigate to venues page with search parameters
-    navigate(`/venues?${params.toString()}`);
+    try {
+      // Build search filters
+      const filters = {};
+      if (searchData.eventType) filters.eventType = searchData.eventType;
+      if (searchData.guests) filters.capacity = searchData.guests;
+      if (searchData.location) filters.city = searchData.location;
+      
+      // Call the search API
+      const result = await spaceService.searchSpaces(filters);
+      
+      if (result.success) {
+        console.log('Search results:', result.data);
+        
+        // Build query parameters for navigation
+        const params = new URLSearchParams();
+        if (searchData.eventType) params.append('eventType', searchData.eventType);
+        if (searchData.guests) params.append('capacity', searchData.guests);
+        if (searchData.location) params.append('city', searchData.location);
+        
+        // Navigate to venues page with search parameters and results
+        navigate(`/venues?${params.toString()}`, { 
+          state: { searchResults: result.data } 
+        });
+      } else {
+        console.error('Search failed:', result.error);
+        // Still navigate but without pre-loaded results
+        const params = new URLSearchParams();
+        if (searchData.eventType) params.append('eventType', searchData.eventType);
+        if (searchData.guests) params.append('capacity', searchData.guests);
+        if (searchData.location) params.append('city', searchData.location);
+        navigate(`/venues?${params.toString()}`);
+      }
+    } catch (error) {
+      console.error('Search error:', error);
+      // Navigate anyway with query params
+      const params = new URLSearchParams();
+      if (searchData.eventType) params.append('eventType', searchData.eventType);
+      if (searchData.guests) params.append('capacity', searchData.guests);
+      if (searchData.location) params.append('city', searchData.location);
+      navigate(`/venues?${params.toString()}`);
+    } finally {
+      setIsSearching(false);
+    }
   };
 
   // Handle click outside to close suggestions
@@ -321,9 +360,12 @@ const HeroSection = () => {
                 <div className="p-4">
                   <button
                     type="submit"
-                    className="w-full md:w-auto px-10 py-[18px] bg-[#FF6B7A] text-white font-semibold rounded-md hover:bg-[#FF5666] transition-colors duration-200 text-base whitespace-nowrap"
+                    disabled={isSearching}
+                    className={`w-full md:w-auto px-10 py-[18px] bg-[#FF6B7A] text-white font-semibold rounded-md hover:bg-[#FF5666] transition-colors duration-200 text-base whitespace-nowrap ${
+                      isSearching ? 'opacity-50 cursor-not-allowed' : ''
+                    }`}
                   >
-                    Search
+                    {isSearching ? 'Searching...' : 'Search'}
                   </button>
                 </div>
               </form>
