@@ -10,6 +10,7 @@ import AmenitiesSection from './AmenitiesSection';
 import ReviewsSection from './ReviewsSection';
 import PackagesSection from './PackagesSection';
 import LandingHeader from '../landing/LandingHeader';
+import { ALL_GENERAL_FACILITIES, ALL_CATERING_FACILITIES, ALL_MUSIC_FACILITIES } from '../../constants/facilities';
 
 const ListingDetail = () => {
   const { id } = useParams();
@@ -147,20 +148,32 @@ With high ceilings, elegant décor, and state-of-the-art facilities, we provide 
               return acc;
             }, {}) || {},
 
-            facilities: spaceData.facilities?.filter(f => f.category === 'general').map(f => ({
-              name: f.name,
-              available: true,
-            })) || [],
+            facilities: (() => {
+              const includedFacilities = spaceData.facilities?.filter(f => f.category === 'general').map(f => f.name) || [];
+              
+              return ALL_GENERAL_FACILITIES.map(facility => ({
+                name: facility,
+                available: includedFacilities.includes(facility),
+              }));
+            })(),
 
-            cateringDrinks: spaceData.facilities?.filter(f => f.category === 'catering').map(f => ({
-              name: f.name,
-              available: true,
-            })) || [],
+            cateringDrinks: (() => {
+              const includedCatering = spaceData.facilities?.filter(f => f.category === 'catering').map(f => f.name) || [];
+              
+              return ALL_CATERING_FACILITIES.map(facility => ({
+                name: facility,
+                available: includedCatering.includes(facility),
+              }));
+            })(),
 
-            musicSound: spaceData.facilities?.filter(f => f.category === 'music').map(f => ({
-              name: f.name,
-              available: true,
-            })) || [],
+            musicSound: (() => {
+              const includedMusic = spaceData.facilities?.filter(f => f.category === 'music').map(f => f.name) || [];
+              
+              return ALL_MUSIC_FACILITIES.map(facility => ({
+                name: facility,
+                available: includedMusic.includes(facility),
+              }));
+            })(),
 
             rules: {
               allowedEvents: Array.isArray(spaceData.allowed_events) 

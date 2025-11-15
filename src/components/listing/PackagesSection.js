@@ -87,12 +87,18 @@ const PackagesSection = ({ packages = [], type = 'venue' }) => {
             <div className="mb-6">
               <h4 className="text-sm font-medium text-gray-900 mb-3">What's included:</h4>
               <ul className="space-y-2">
-                {pkg.features.map((feature, index) => (
-                  <li key={index} className="flex items-start gap-2 text-sm text-gray-600">
-                    <FaCheck className="text-teal-500 mt-0.5 flex-shrink-0" size={14} />
-                    <span>{feature}</span>
-                  </li>
-                ))}
+                {pkg.features.map((feature, index) => {
+                  // Check if feature is an object with 'name' and 'included' properties
+                  const featureName = typeof feature === 'string' ? feature : feature.name;
+                  const isIncluded = typeof feature === 'string' ? true : feature.included !== false;
+                  
+                  return (
+                    <li key={index} className={`flex items-start gap-2 text-sm ${isIncluded ? 'text-gray-600' : 'text-gray-400'}`}>
+                      <FaCheck className={`${isIncluded ? 'text-teal-500' : 'text-gray-300'} mt-0.5 flex-shrink-0`} size={14} />
+                      <span className={isIncluded ? '' : 'line-through'}>{featureName}</span>
+                    </li>
+                  );
+                })}
               </ul>
             </div>
 
