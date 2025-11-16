@@ -26,14 +26,21 @@ const AddSpaceWizard = () => {
       // Overview
       name: '',
       venue_type: [],
-      city: '',
-      location: '',
-      
-      // Details
       description: '',
-      venue_name: '',
+      
+      // Details (Address & Location)
+      street_address: '',
+      street_address_line2: '',
+      city: '',
+      postal_code: '',
+      province: '',
       business_phone: '',
       business_email: '',
+      latitude: '',
+      longitude: '',
+      
+      // Space Type
+      space_type: '',
       
       // Capacity
       capacity: '',
@@ -112,12 +119,24 @@ const AddSpaceWizard = () => {
       // Prepare data for backend - matching exact API structure
       // API Endpoint: POST /api/spaces/
       // Expected format matches the backend schema exactly
+      
+      // Build full location address from address components
+      const addressParts = [
+        spaceData.street_address,
+        spaceData.street_address_line2,
+        spaceData.city,
+        spaceData.postal_code,
+        spaceData.province
+      ].filter(Boolean);
+      const fullLocation = addressParts.join(', ');
+      
       const payload = {
-        venue_name: spaceData.venue_name || spaceData.name,
+        venue_name: spaceData.name,
         venue_type: Array.isArray(spaceData.venue_type) 
           ? spaceData.venue_type.join(', ') 
           : spaceData.venue_type,
-        location: spaceData.location,
+        space_type: spaceData.space_type,
+        location: fullLocation,
         city: spaceData.city,
         description: spaceData.description,
         capacity: parseInt(spaceData.capacity) || 0,
@@ -201,12 +220,17 @@ const AddSpaceWizard = () => {
       setSpaceData({
         name: '',
         venue_type: [],
-        city: '',
-        location: '',
         description: '',
-        venue_name: '',
+        street_address: '',
+        street_address_line2: '',
+        city: '',
+        postal_code: '',
+        province: '',
         business_phone: '',
         business_email: '',
+        latitude: '',
+        longitude: '',
+        space_type: '',
         capacity: '',
         capacities: {},
         facilities: [],
@@ -243,12 +267,17 @@ const AddSpaceWizard = () => {
       setSpaceData({
         name: '',
         venue_type: [],
-        city: '',
-        location: '',
         description: '',
-        venue_name: '',
+        street_address: '',
+        street_address_line2: '',
+        city: '',
+        postal_code: '',
+        province: '',
         business_phone: '',
         business_email: '',
+        latitude: '',
+        longitude: '',
+        space_type: '',
         capacity: '',
         capacities: {},
         facilities: [],
