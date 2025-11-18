@@ -39,7 +39,7 @@ const LandingHeader = () => {
             <span className="text-sm font-medium">Log in</span>
           </Link>
           <Link 
-            to="/vendor/add-space" 
+            to="/list-your-venue" 
             className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
           >
             <FaBuilding className="w-4 h-4" />

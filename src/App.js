@@ -3,7 +3,9 @@ import './App.css';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import LandingPage from './components/landing/LandingPage';
 import HomeSearch from './components/home/HomeSearch';
-import Login from './components/auth/Login';
+import LoginLanding from './components/auth/LoginLanding';
+import ClientLogin from './components/auth/ClientLogin';
+import ListYourVenue from './components/landing/ListYourVenue';
 import Signup from './components/auth/Signup';
 import ProfilePage from './components/profile/ProfilePage';
 import ListingsPage from './components/listing/ListingsPage';
@@ -20,8 +22,11 @@ function App() {
           <Routes>
             <Route path="/" element={<LandingPage />} />
             <Route path="/search" element={<HomeSearch />} />
-            <Route path="/login" element={<Login />} />
+            <Route path="/login" element={<LoginLanding />} />
+            <Route path="/login/user" element={<ClientLogin />} />
+            <Route path="/list-your-venue" element={<ListYourVenue />} />
             <Route path="/register" element={<Signup />} />
+            <Route path="/signup/user" element={<Signup />} />
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/venues" element={<ListingsPage />} />
             <Route path="/venues/:id" element={<ListingDetail />} />
