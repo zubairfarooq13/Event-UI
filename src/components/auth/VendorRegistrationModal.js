@@ -84,9 +84,8 @@ const VendorRegistrationModal = ({ isOpen, onClose }) => {
         password: formData.password,
         name: `${formData.firstName} ${formData.lastName}`,
         phone: `${formData.phoneCode}${formData.phoneNumber}`,
-        businessName: formData.venueName,
-        businessType: 'Venue',
-        companyName: formData.companyName,
+        businessName: formData.companyName,
+        vendorName: formData.venueName,
         country: formData.country,
         postalCode: formData.postalCode,
         website: formData.website

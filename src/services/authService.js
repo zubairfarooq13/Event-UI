@@ -69,6 +69,40 @@ class AuthService {
     }
   }
 
+  // Vendor Authentication
+  async signupVendor(vendorData) {
+    try {
+      const response = await apiClient.post('/api/auth/vendor/signup', vendorData);
+      
+      // Handle the response structure from your backend
+      if (response.data && response.data.data) {
+        const { access_token, refresh_token, user } = response.data.data;
+        
+        // Set the auth token in localStorage for subsequent requests
+        setAuthToken(access_token);
+        
+        return {
+          success: true,
+          data: { 
+            token: access_token,
+            refreshToken: refresh_token,
+            user: user,
+            role: user.role || 'vendor'
+          },
+          message: response.data.message || 'Vendor account created successfully'
+        };
+      } else {
+        throw new Error('Invalid response format');
+      }
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || error.message || 'Vendor signup failed',
+        error: error.response?.data?.errors || null
+      };
+    }
+  }
+
   async logout() {
     try {
       // Call backend logout endpoint (optional)
