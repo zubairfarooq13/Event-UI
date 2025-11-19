@@ -2,13 +2,23 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaCheck, FaCalendarAlt, FaUsers, FaChartLine, FaChevronDown, FaChevronUp } from 'react-icons/fa';
 import LandingHeader from '../landing/LandingHeader';
+import VendorRegistrationModal from '../auth/VendorRegistrationModal';
 
 const ListYourVenue = () => {
   const navigate = useNavigate();
   const [openFAQ, setOpenFAQ] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const toggleFAQ = (index) => {
     setOpenFAQ(openFAQ === index ? null : index);
+  };
+
+  const openRegistrationModal = () => {
+    setIsModalOpen(true);
+  };
+
+  const closeRegistrationModal = () => {
+    setIsModalOpen(false);
   };
 
   const eventTypes = [
@@ -90,7 +100,7 @@ const ListYourVenue = () => {
 
   return (
     <div className="min-h-screen bg-white">
-      <LandingHeader />
+      <LandingHeader onListYourSpace={openRegistrationModal} />
 
       {/* Hero Section */}
       <section className="pt-24 pb-12">
@@ -105,7 +115,7 @@ const ListYourVenue = () => {
                 Showcase your space for free to 700,000+ event organizers each month and fill your calendar with bookings.
               </p>
               <button
-                onClick={() => navigate('/vendor/add-space')}
+                onClick={openRegistrationModal}
                 className="px-8 py-4 bg-red-500 text-white text-lg font-semibold rounded-lg hover:bg-red-600 transition-colors shadow-lg"
               >
                 List your space
@@ -233,9 +243,9 @@ const ListYourVenue = () => {
             ))}
           </div>
 
-          <div className="text-center mt-12">
+          <div className="text-center">
             <button
-              onClick={() => navigate('/vendor/add-space')}
+              onClick={openRegistrationModal}
               className="px-8 py-4 bg-red-500 text-white text-lg font-semibold rounded-lg hover:bg-red-600 transition-colors shadow-lg"
             >
               List your space
@@ -337,13 +347,16 @@ const ListYourVenue = () => {
           </p>
 
           <button
-            onClick={() => navigate('/vendor/add-space')}
+            onClick={openRegistrationModal}
             className="px-8 py-4 bg-red-500 text-white text-lg font-semibold rounded-lg hover:bg-red-600 transition-colors shadow-xl"
           >
             List your space
           </button>
         </div>
       </section>
+
+      {/* Vendor Registration Modal */}
+      <VendorRegistrationModal isOpen={isModalOpen} onClose={closeRegistrationModal} />
     </div>
   );
 };

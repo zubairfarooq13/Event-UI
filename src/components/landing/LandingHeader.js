@@ -1,8 +1,11 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { FaUser, FaBuilding } from 'react-icons/fa';
 
-const LandingHeader = () => {
+const LandingHeader = ({ onListYourSpace }) => {
+  const location = useLocation();
+  const isListYourVenuePage = location.pathname === '/list-your-venue';
+
   return (
     <header className="fixed top-0 left-0 right-0 bg-white border-b border-gray-200 z-50 h-16">
       <div className="max-w-7xl mx-auto px-6 lg:px-8 h-full flex items-center justify-between">
@@ -38,13 +41,22 @@ const LandingHeader = () => {
             <FaUser className="w-4 h-4" />
             <span className="text-sm font-medium">Log in</span>
           </Link>
-          <Link 
-            to="/list-your-venue" 
-            className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
-          >
-            <FaBuilding className="w-4 h-4" />
-            <span className="text-sm font-medium">List your venue</span>
-          </Link>
+          {isListYourVenuePage ? (
+            <button
+              onClick={onListYourSpace}
+              className="px-6 py-2 bg-red-500 text-white font-semibold rounded-lg hover:bg-red-600 transition-colors"
+            >
+              List your space
+            </button>
+          ) : (
+            <Link 
+              to="/list-your-venue" 
+              className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
+            >
+              <FaBuilding className="w-4 h-4" />
+              <span className="text-sm font-medium">List your venue</span>
+            </Link>
+          )}
         </nav>
       </div>
     </header>
