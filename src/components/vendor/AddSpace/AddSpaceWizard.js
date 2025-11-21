@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { FaCheck } from 'react-icons/fa';
 import spaceService from '../../../services/spaceService';
 import OverviewStep from './steps/OverviewStep';
@@ -13,8 +13,11 @@ import ReviewStep from './steps/ReviewStep';
 
 const AddSpaceWizard = () => {
   const navigate = useNavigate();
+  const { spaceId } = useParams();
+  const isEditMode = !!spaceId;
   const [currentStep, setCurrentStep] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   
   // Initialize state from localStorage (for draft recovery) or empty
   const [spaceData, setSpaceData] = useState(() => {
@@ -83,10 +86,87 @@ const AddSpaceWizard = () => {
     { id: 7, title: 'Review', component: ReviewStep }
   ];
 
-  // Save to localStorage whenever spaceData changes (auto-save draft)
-  React.useEffect(() => {
-    localStorage.setItem('space_draft', JSON.stringify(spaceData));
-  }, [spaceData]);
+  // Fetch existing space data in edit mode
+  useEffect(() => {
+    const fetchSpaceData = async () => {
+      if (isEditMode && spaceId) {
+        setIsLoading(true);
+        try {
+          const result = await spaceService.getSpaceById(spaceId);
+          if (result.success && result.data) {
+            const space = result.data;
+            
+            // Map backend data to form structure
+            const mappedData = {
+              name: space.venue_name || '',
+              venue_type: typeof space.venue_type === 'string' 
+                ? space.venue_type.split(', ') 
+                : space.venue_type || [],
+              description: space.description || '',
+              
+              // Parse location back to address components
+              street_address: space.location?.split(', ')[0] || '',
+              street_address_line2: space.location?.split(', ')[1] || '',
+              city: space.city || '',
+              postal_code: space.postal_code || '',
+              province: space.province || '',
+              business_phone: space.phone || '',
+              business_email: space.email || '',
+              latitude: space.latitude || '',
+              longitude: space.longitude || '',
+              
+              space_type: space.space_type || '',
+              capacity: space.capacity?.toString() || '',
+              
+              // Convert capacities array to object
+              capacities: (space.capacities || []).reduce((acc, cap) => {
+                acc[cap.capacity_type] = cap.capacity_value?.toString() || '';
+                return acc;
+              }, {}),
+              
+              // Group facilities by category
+              facilities: (space.facilities || []).filter(f => f.category === 'general').map(f => f.name),
+              catering_drinks: (space.facilities || []).filter(f => f.category === 'catering').map(f => f.name),
+              music_sound: (space.facilities || []).filter(f => f.category === 'music').map(f => f.name),
+              
+              // Convert pricing array
+              pricing: (space.pricing || []).map(p => ({
+                period_type: p.pricing_type,
+                amount: p.price?.toString() || ''
+              })),
+              
+              packages: space.packages || [],
+              
+              photos: (space.photos || []).map(p => p.photo_url),
+              
+              // Extract rules by type
+              house_rules: (space.rules || []).filter(r => r.rule_type === 'house_rule').map(r => r.rule_text),
+              cancellation_policy: (space.rules || []).find(r => r.rule_type === 'cancellation_policy')?.rule_text || '',
+              
+              allowed_events: space.allowed_events || []
+            };
+            
+            setSpaceData(mappedData);
+          }
+        } catch (error) {
+          console.error('Error fetching space data:', error);
+          alert('Failed to load space data');
+          navigate('/vendor/spaces');
+        } finally {
+          setIsLoading(false);
+        }
+      }
+    };
+    
+    fetchSpaceData();
+  }, [spaceId, isEditMode, navigate]);
+  
+  // Save to localStorage whenever spaceData changes (auto-save draft) - only in add mode
+  useEffect(() => {
+    if (!isEditMode) {
+      localStorage.setItem('space_draft', JSON.stringify(spaceData));
+    }
+  }, [spaceData, isEditMode]);
 
   const handleNext = () => {
     if (currentStep < steps.length - 1) {
@@ -206,8 +286,10 @@ const AddSpaceWizard = () => {
 
       console.log('Submitting space data:', payload);
       
-      // Make API call using spaceService
-      const result = await spaceService.createSpace(payload);
+      // Make API call using spaceService (create or update)
+      const result = isEditMode 
+        ? await spaceService.updateSpace(spaceId, payload)
+        : await spaceService.createSpace(payload);
       
       if (!result.success) {
         throw new Error(result.error || 'Failed to submit space');
@@ -244,8 +326,8 @@ const AddSpaceWizard = () => {
         cancellation_policy: ''
       });
       
-      alert('Space submitted successfully! It will be reviewed by our team.');
-      navigate('/vendor/dashboard');
+      alert(isEditMode ? 'Space updated successfully!' : 'Space submitted successfully! It will be reviewed by our team.');
+      navigate('/vendor/spaces');
       
     } catch (error) {
       console.error('Error submitting space:', error);
@@ -305,7 +387,7 @@ const AddSpaceWizard = () => {
             <div className="w-8 h-8 bg-teal-600 rounded flex items-center justify-center">
               <span className="text-white font-bold text-sm">TV</span>
             </div>
-            <span className="text-xl font-semibold text-gray-900">Add Your Space</span>
+            <span className="text-xl font-semibold text-gray-900">{isEditMode ? 'Edit Your Space' : 'Add Your Space'}</span>
           </div>
           <button
             onClick={handleSaveAndExit}
@@ -359,6 +441,15 @@ const AddSpaceWizard = () => {
 
       {/* Main Content */}
       <div className="max-w-4xl mx-auto px-4 py-8">
+        {isLoading ? (
+          <div className="flex items-center justify-center py-12">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-600 mx-auto mb-4"></div>
+              <p className="text-gray-600">Loading space data...</p>
+            </div>
+          </div>
+        ) : (
+          <>
         <CurrentStepComponent
           data={spaceData}
           onChange={handleDataChange}
@@ -402,7 +493,7 @@ const AddSpaceWizard = () => {
                   : 'hover:bg-teal-700'
               }`}
             >
-              {isSubmitting ? 'Submitting...' : 'Submit Space'}
+              {isSubmitting ? (isEditMode ? 'Updating...' : 'Submitting...') : (isEditMode ? 'Update Space' : 'Submit Space')}
             </button>
           ) : (
             <button
@@ -418,6 +509,8 @@ const AddSpaceWizard = () => {
             </button>
           )}
         </div>
+          </>
+        )}
       </div>
     </div>
   );
