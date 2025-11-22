@@ -4,13 +4,11 @@ import { FaGoogle, FaFacebook, FaUser, FaEnvelope, FaLock } from 'react-icons/fa
 import { authService } from '../../services';
 import LandingHeader from '../common/headers/LandingHeader';
 
-const Signup = () => {
+const UserLogin = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
-  const [acceptMarketing, setAcceptMarketing] = useState(false);
   const [formData, setFormData] = useState({
-    name: '',
     email: '',
     password: ''
   });
@@ -29,13 +27,13 @@ const Signup = () => {
     setError('');
 
     try {
-      const result = await authService.signupUser(formData);
+      const result = await authService.loginUser(formData);
       
       if (result.success) {
         // Redirect to user enquiries page
         navigate('/user/enquiries');
       } else {
-        setError(result.message || 'Signup failed. Please try again.');
+        setError(result.message || 'Login failed. Please check your credentials.');
       }
     } catch (err) {
       setError('An error occurred. Please try again.');
@@ -44,8 +42,8 @@ const Signup = () => {
     }
   };
 
-  const handleSocialSignup = (provider) => {
-    setError(`${provider} signup will be available soon.`);
+  const handleSocialLogin = (provider) => {
+    setError(`${provider} login will be available soon.`);
   };
 
   return (
@@ -60,11 +58,11 @@ const Signup = () => {
               <FaUser className="text-white text-2xl" />
             </div>
             <h1 className="text-3xl md:text-4xl font-bold text-gray-900">
-              User sign up
+              User login
             </h1>
           </div>
 
-          {/* Signup Card */}
+          {/* Login Card */}
           <div className="bg-white rounded-lg shadow-md p-8">
             {/* Error Message */}
             {error && (
@@ -73,24 +71,24 @@ const Signup = () => {
               </div>
             )}
 
-            {/* Social Signup Buttons */}
+            {/* Social Login Buttons */}
             <div className="space-y-3 mb-6">
               <button
                 type="button"
-                onClick={() => handleSocialSignup('Facebook')}
+                onClick={() => handleSocialLogin('Facebook')}
                 className="w-full py-3 px-4 border border-gray-300 rounded-lg flex items-center justify-center hover:bg-gray-50 transition-colors"
               >
                 <FaFacebook className="text-blue-600 mr-3" size={20} />
-                <span className="font-medium text-gray-700">Sign up with Facebook</span>
+                <span className="font-medium text-gray-700">Log in with Facebook</span>
               </button>
 
               <button
                 type="button"
-                onClick={() => handleSocialSignup('Google')}
+                onClick={() => handleSocialLogin('Google')}
                 className="w-full py-3 px-4 border border-gray-300 rounded-lg flex items-center justify-center hover:bg-gray-50 transition-colors"
               >
                 <FaGoogle className="text-red-500 mr-3" size={20} />
-                <span className="font-medium text-gray-700">Sign up with Google</span>
+                <span className="font-medium text-gray-700">Log in with Google</span>
               </button>
             </div>
 
@@ -101,28 +99,8 @@ const Signup = () => {
               <div className="flex-1 border-t border-gray-300"></div>
             </div>
 
-            {/* Signup Form */}
+            {/* Login Form */}
             <form onSubmit={handleSubmit} className="space-y-4">
-              {/* Full Name Field */}
-              <div>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <FaUser className="text-gray-400" size={16} />
-                  </div>
-                  <input
-                    type="text"
-                    id="name"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleInputChange}
-                    placeholder="Full name"
-                    required
-                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all outline-none"
-                    disabled={isLoading}
-                  />
-                </div>
-              </div>
-
               {/* Email Field */}
               <div>
                 <div className="relative">
@@ -135,7 +113,7 @@ const Signup = () => {
                     name="email"
                     value={formData.email}
                     onChange={handleInputChange}
-                    placeholder="Email - watch out for typos"
+                    placeholder="Email address"
                     required
                     className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all outline-none"
                     disabled={isLoading}
@@ -155,7 +133,7 @@ const Signup = () => {
                     name="password"
                     value={formData.password}
                     onChange={handleInputChange}
-                    placeholder="Create a password"
+                    placeholder="Password"
                     required
                     className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all outline-none"
                     disabled={isLoading}
@@ -163,18 +141,14 @@ const Signup = () => {
                 </div>
               </div>
 
-              {/* Marketing Checkbox */}
-              <div className="flex items-start">
-                <input
-                  type="checkbox"
-                  id="acceptMarketing"
-                  checked={acceptMarketing}
-                  onChange={(e) => setAcceptMarketing(e.target.checked)}
-                  className="w-4 h-4 mt-1 text-teal-600 border-gray-300 rounded focus:ring-teal-500"
-                />
-                <label htmlFor="acceptMarketing" className="ml-3 text-sm text-gray-600">
-                  I'd like to receive marketing promotions, special offers and inspiration from Tagvenue. I can opt out at any time.
-                </label>
+              {/* Forgot Password Link */}
+              <div className="text-left">
+                <button
+                  type="button"
+                  className="text-sm text-teal-600 hover:text-teal-700 font-medium"
+                >
+                  Forgot your password?
+                </button>
               </div>
 
               {/* Submit Button */}
@@ -183,38 +157,19 @@ const Signup = () => {
                 disabled={isLoading}
                 className="w-full py-3 bg-teal-600 text-white font-semibold rounded-lg hover:bg-teal-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {isLoading ? 'Signing up...' : 'Sign up'}
+                {isLoading ? 'Logging in...' : 'Log in'}
               </button>
             </form>
 
-            {/* Terms and Privacy */}
-            <div className="mt-6 text-center">
-              <p className="text-xs text-gray-500">
-                By continuing you are creating an account and accepting our{' '}
-                <a href="/terms" className="text-teal-600 hover:text-teal-700">
-                  Terms and Conditions
-                </a>
-                ,{' '}
-                <a href="/privacy" className="text-teal-600 hover:text-teal-700">
-                  Privacy Policy
-                </a>{' '}
-                and{' '}
-                <a href="/cancellation" className="text-teal-600 hover:text-teal-700">
-                  Cancellation and Refund Policy
-                </a>
-                .
-              </p>
-            </div>
-
-            {/* Login Link */}
+            {/* Sign Up Link */}
             <div className="mt-6 text-center">
               <p className="text-gray-600">
-                Already have a User Account?{' '}
+                Don't have a User Account?{' '}
                 <button
-                  onClick={() => navigate('/login/user')}
+                  onClick={() => navigate('/signup/user')}
                   className="text-teal-600 hover:text-teal-700 font-semibold"
                 >
-                  Log in
+                  Sign up
                 </button>
               </p>
             </div>
@@ -225,4 +180,4 @@ const Signup = () => {
   );
 };
 
-export default Signup;
+export default UserLogin;

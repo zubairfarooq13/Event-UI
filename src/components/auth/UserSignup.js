@@ -4,11 +4,13 @@ import { FaGoogle, FaFacebook, FaUser, FaEnvelope, FaLock } from 'react-icons/fa
 import { authService } from '../../services';
 import LandingHeader from '../common/headers/LandingHeader';
 
-const ClientLogin = () => {
+const UserSignup = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [acceptMarketing, setAcceptMarketing] = useState(false);
   const [formData, setFormData] = useState({
+    name: '',
     email: '',
     password: ''
   });
@@ -27,13 +29,13 @@ const ClientLogin = () => {
     setError('');
 
     try {
-      const result = await authService.loginUser(formData);
+      const result = await authService.signupUser(formData);
       
       if (result.success) {
         // Redirect to user enquiries page
         navigate('/user/enquiries');
       } else {
-        setError(result.message || 'Login failed. Please check your credentials.');
+        setError(result.message || 'Signup failed. Please try again.');
       }
     } catch (err) {
       setError('An error occurred. Please try again.');
@@ -42,8 +44,8 @@ const ClientLogin = () => {
     }
   };
 
-  const handleSocialLogin = (provider) => {
-    setError(`${provider} login will be available soon.`);
+  const handleSocialSignup = (provider) => {
+    setError(`${provider} signup will be available soon.`);
   };
 
   return (
@@ -58,11 +60,11 @@ const ClientLogin = () => {
               <FaUser className="text-white text-2xl" />
             </div>
             <h1 className="text-3xl md:text-4xl font-bold text-gray-900">
-              User login
+              User sign up
             </h1>
           </div>
 
-          {/* Login Card */}
+          {/* Signup Card */}
           <div className="bg-white rounded-lg shadow-md p-8">
             {/* Error Message */}
             {error && (
@@ -71,24 +73,24 @@ const ClientLogin = () => {
               </div>
             )}
 
-            {/* Social Login Buttons */}
+            {/* Social Signup Buttons */}
             <div className="space-y-3 mb-6">
               <button
                 type="button"
-                onClick={() => handleSocialLogin('Facebook')}
+                onClick={() => handleSocialSignup('Facebook')}
                 className="w-full py-3 px-4 border border-gray-300 rounded-lg flex items-center justify-center hover:bg-gray-50 transition-colors"
               >
                 <FaFacebook className="text-blue-600 mr-3" size={20} />
-                <span className="font-medium text-gray-700">Log in with Facebook</span>
+                <span className="font-medium text-gray-700">Sign up with Facebook</span>
               </button>
 
               <button
                 type="button"
-                onClick={() => handleSocialLogin('Google')}
+                onClick={() => handleSocialSignup('Google')}
                 className="w-full py-3 px-4 border border-gray-300 rounded-lg flex items-center justify-center hover:bg-gray-50 transition-colors"
               >
                 <FaGoogle className="text-red-500 mr-3" size={20} />
-                <span className="font-medium text-gray-700">Log in with Google</span>
+                <span className="font-medium text-gray-700">Sign up with Google</span>
               </button>
             </div>
 
@@ -99,8 +101,28 @@ const ClientLogin = () => {
               <div className="flex-1 border-t border-gray-300"></div>
             </div>
 
-            {/* Login Form */}
+            {/* Signup Form */}
             <form onSubmit={handleSubmit} className="space-y-4">
+              {/* Full Name Field */}
+              <div>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <FaUser className="text-gray-400" size={16} />
+                  </div>
+                  <input
+                    type="text"
+                    id="name"
+                    name="name"
+                    value={formData.name}
+                    onChange={handleInputChange}
+                    placeholder="Full name"
+                    required
+                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all outline-none"
+                    disabled={isLoading}
+                  />
+                </div>
+              </div>
+
               {/* Email Field */}
               <div>
                 <div className="relative">
@@ -113,7 +135,7 @@ const ClientLogin = () => {
                     name="email"
                     value={formData.email}
                     onChange={handleInputChange}
-                    placeholder="Email address"
+                    placeholder="Email - watch out for typos"
                     required
                     className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all outline-none"
                     disabled={isLoading}
@@ -133,7 +155,7 @@ const ClientLogin = () => {
                     name="password"
                     value={formData.password}
                     onChange={handleInputChange}
-                    placeholder="Password"
+                    placeholder="Create a password"
                     required
                     className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all outline-none"
                     disabled={isLoading}
@@ -141,14 +163,18 @@ const ClientLogin = () => {
                 </div>
               </div>
 
-              {/* Forgot Password Link */}
-              <div className="text-left">
-                <button
-                  type="button"
-                  className="text-sm text-teal-600 hover:text-teal-700 font-medium"
-                >
-                  Forgot your password?
-                </button>
+              {/* Marketing Checkbox */}
+              <div className="flex items-start">
+                <input
+                  type="checkbox"
+                  id="acceptMarketing"
+                  checked={acceptMarketing}
+                  onChange={(e) => setAcceptMarketing(e.target.checked)}
+                  className="w-4 h-4 mt-1 text-teal-600 border-gray-300 rounded focus:ring-teal-500"
+                />
+                <label htmlFor="acceptMarketing" className="ml-3 text-sm text-gray-600">
+                  I'd like to receive marketing promotions, special offers and inspiration from Tagvenue. I can opt out at any time.
+                </label>
               </div>
 
               {/* Submit Button */}
@@ -157,19 +183,38 @@ const ClientLogin = () => {
                 disabled={isLoading}
                 className="w-full py-3 bg-teal-600 text-white font-semibold rounded-lg hover:bg-teal-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {isLoading ? 'Logging in...' : 'Log in'}
+                {isLoading ? 'Signing up...' : 'Sign up'}
               </button>
             </form>
 
-            {/* Sign Up Link */}
+            {/* Terms and Privacy */}
+            <div className="mt-6 text-center">
+              <p className="text-xs text-gray-500">
+                By continuing you are creating an account and accepting our{' '}
+                <a href="/terms" className="text-teal-600 hover:text-teal-700">
+                  Terms and Conditions
+                </a>
+                ,{' '}
+                <a href="/privacy" className="text-teal-600 hover:text-teal-700">
+                  Privacy Policy
+                </a>{' '}
+                and{' '}
+                <a href="/cancellation" className="text-teal-600 hover:text-teal-700">
+                  Cancellation and Refund Policy
+                </a>
+                .
+              </p>
+            </div>
+
+            {/* Login Link */}
             <div className="mt-6 text-center">
               <p className="text-gray-600">
-                Don't have a User Account?{' '}
+                Already have a User Account?{' '}
                 <button
-                  onClick={() => navigate('/signup/user')}
+                  onClick={() => navigate('/login/user')}
                   className="text-teal-600 hover:text-teal-700 font-semibold"
                 >
-                  Sign up
+                  Log in
                 </button>
               </p>
             </div>
@@ -180,4 +225,4 @@ const ClientLogin = () => {
   );
 };
 
-export default ClientLogin;
+export default UserSignup;

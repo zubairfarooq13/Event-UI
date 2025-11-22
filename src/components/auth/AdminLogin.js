@@ -17,7 +17,7 @@ const loginSchema = yup.object().shape({
     .min(6, 'Password must be at least 6 characters'),
 });
 
-const Login = ({ onLogin, onSwitchToSignup }) => {
+const AdminLogin = ({ onLogin, onSwitchToSignup }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -246,4 +246,4 @@ const Login = ({ onLogin, onSwitchToSignup }) => {
   );
 };
 
-export default Login;
+export default AdminLogin;
