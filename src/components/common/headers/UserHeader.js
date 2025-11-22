@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '../../../contexts/AuthContext';
-import { FaBell, FaHeart, FaUserCircle, FaSignOutAlt, FaCog } from 'react-icons/fa';
+import { FaBell, FaHeart, FaUserCircle, FaSignOutAlt, FaExchangeAlt, FaUser, FaChevronDown } from 'react-icons/fa';
 
 const UserHeader = () => {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
@@ -14,6 +14,15 @@ const UserHeader = () => {
     await logout();
     setIsUserMenuOpen(false);
     navigate('/');
+  };
+
+  const handleSwitchTo = (role) => {
+    setIsUserMenuOpen(false);
+    if (role === 'vendor') {
+      navigate('/vendor/dashboard');
+    } else if (role === 'admin') {
+      navigate('/admin/dashboard');
+    }
   };
 
   // Close user menu when clicking outside
@@ -31,7 +40,12 @@ const UserHeader = () => {
   }, []);
 
   const getUserDisplayName = () => {
-    return user?.name || user?.email || 'User';
+    return user?.name || user?.email?.split('@')[0] || 'User';
+  };
+
+  const getUserInitials = () => {
+    const name = user?.name || user?.email || 'U';
+    return name.substring(0, 2).toUpperCase();
   };
 
   return (
@@ -73,47 +87,50 @@ const UserHeader = () => {
             <div className="relative" ref={userMenuRef}>
               <button
                 onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                className="flex items-center space-x-2 px-3 py-2 rounded-full hover:bg-gray-50 transition-colors duration-200"
+                className="flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors duration-200 border border-gray-200"
                 aria-expanded={isUserMenuOpen}
               >
-                <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
-                  <FaUserCircle size={32} className="text-gray-400" />
+                <div className="w-8 h-8 bg-teal-500 rounded-full flex items-center justify-center text-white text-sm font-semibold">
+                  {getUserInitials()}
                 </div>
                 <span className="text-sm font-medium text-gray-700 hidden md:inline">
                   {getUserDisplayName()}
                 </span>
+                <FaChevronDown className="text-gray-400 text-xs hidden md:inline" />
               </button>
 
               {/* Dropdown Menu */}
               {isUserMenuOpen && (
-                <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-xl border border-gray-200">
-                  <div className="py-1">
-                    <Link
-                      to="/profile"
-                      onClick={() => setIsUserMenuOpen(false)}
-                      className="flex items-center w-full px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                    >
-                      <FaUserCircle className="mr-3 text-gray-400" size={16} />
-                      My Profile
-                    </Link>
+                <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-xl border border-gray-200 py-2 z-50">
+                  <Link
+                    to="/user/account"
+                    onClick={() => setIsUserMenuOpen(false)}
+                    className="flex items-center w-full px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                  >
+                    <FaUser className="mr-3 text-gray-400" size={16} />
+                    My Account
+                  </Link>
 
-                    <Link
-                      to="/user/settings"
-                      onClick={() => setIsUserMenuOpen(false)}
-                      className="flex items-center w-full px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                    >
-                      <FaCog className="mr-3 text-gray-400" size={16} />
-                      Settings
-                    </Link>
+                  <div className="border-t border-gray-200 my-1"></div>
 
-                    <div className="border-t border-gray-200 my-1"></div>
+                  <button
+                    onClick={handleLogout}
+                    className="flex items-center w-full px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                  >
+                    <FaSignOutAlt className="mr-3 text-gray-400" size={16} />
+                    Logout
+                  </button>
 
+                  <div className="border-t border-gray-200 my-1"></div>
+
+                  <div className="px-4 py-2">
+                    <p className="text-xs text-gray-500 mb-2">Switch to</p>
                     <button
-                      onClick={handleLogout}
-                      className="flex items-center w-full px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                      onClick={() => handleSwitchTo('vendor')}
+                      className="flex items-center w-full px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded transition-colors"
                     >
-                      <FaSignOutAlt className="mr-3 text-gray-400" size={16} />
-                      Log out
+                      <FaExchangeAlt className="mr-2 text-gray-400" size={14} />
+                      Vendor Dashboard
                     </button>
                   </div>
                 </div>

@@ -17,6 +17,7 @@ import VendorAccount from './components/vendor/Account/VendorAccount';
 import VendorHelpCenter from './components/vendor/Help/VendorHelpCenter';
 import UserEnquiries from './components/user/UserEnquiries';
 import UserFavourites from './components/user/UserFavourites';
+import UserAccount from './components/user/UserAccount';
 import { AuthProvider } from './contexts/AuthContext';  
 
 function App() {
@@ -39,6 +40,7 @@ function App() {
             {/* User Routes */}
             <Route path="/user/enquiries" element={<UserEnquiries />} />
             <Route path="/user/favourites" element={<UserFavourites />} />
+            <Route path="/user/account" element={<UserAccount />} />
             
             {/* Vendor Routes */}
             <Route path="/vendor/dashboard" element={<VendorDashboard />} />

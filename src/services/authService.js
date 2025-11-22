@@ -35,11 +35,10 @@ class AuthService {
       };
     }
   }
-
-  // Vendor Authentication
-  async loginVendor(credentials) {
+  
+  async signupUser(userData) {
     try {
-      const response = await apiClient.post('/api/auth/vendor/login', credentials);
+      const response = await apiClient.post('/api/auth/user/signup', userData);
       
       // Handle the response structure from your backend
       if (response.data && response.data.data) {
@@ -54,9 +53,9 @@ class AuthService {
             token: access_token,
             refreshToken: refresh_token,
             user: user,
-            role: user.role || 'vendor'
+            role: user.role || 'customer'
           },
-          message: response.data.message || 'Vendor login successful'
+          message: response.data.message || 'Account created successfully'
         };
       } else {
         throw new Error('Invalid response format');
@@ -64,7 +63,7 @@ class AuthService {
     } catch (error) {
       return {
         success: false,
-        message: error.response?.data?.message || error.message || 'Vendor login failed',
+        message: error.response?.data?.message || error.message || 'Signup failed',
         error: error.response?.data?.errors || null
       };
     }
@@ -104,39 +103,6 @@ class AuthService {
     }
   }
 
-  async signupUser(userData) {
-    try {
-      const response = await apiClient.post('/api/auth/signup', userData);
-      
-      // Handle the response structure from your backend
-      if (response.data && response.data.data) {
-        const { access_token, refresh_token, user } = response.data.data;
-        
-        // Set the auth token in localStorage for subsequent requests
-        setAuthToken(access_token);
-        
-        return {
-          success: true,
-          data: { 
-            token: access_token,
-            refreshToken: refresh_token,
-            user: user,
-            role: user.role || 'customer'
-          },
-          message: response.data.message || 'Account created successfully'
-        };
-      } else {
-        throw new Error('Invalid response format');
-      }
-    } catch (error) {
-      return {
-        success: false,
-        message: error.response?.data?.message || error.message || 'Signup failed',
-        error: error.response?.data?.errors || null
-      };
-    }
-  }
-
   // Vendor Authentication
   async signupVendor(vendorData) {
     try {
@@ -166,6 +132,39 @@ class AuthService {
       return {
         success: false,
         message: error.response?.data?.message || error.message || 'Vendor signup failed',
+        error: error.response?.data?.errors || null
+      };
+    }
+  }
+
+  async loginVendor(credentials) {
+    try {
+      const response = await apiClient.post('/api/auth/vendor/login', credentials);
+      
+      // Handle the response structure from your backend
+      if (response.data && response.data.data) {
+        const { access_token, refresh_token, user } = response.data.data;
+        
+        // Set the auth token in localStorage for subsequent requests
+        setAuthToken(access_token);
+        
+        return {
+          success: true,
+          data: { 
+            token: access_token,
+            refreshToken: refresh_token,
+            user: user,
+            role: user.role || 'vendor'
+          },
+          message: response.data.message || 'Vendor login successful'
+        };
+      } else {
+        throw new Error('Invalid response format');
+      }
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || error.message || 'Vendor login failed',
         error: error.response?.data?.errors || null
       };
     }
