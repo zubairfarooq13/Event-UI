@@ -5,7 +5,7 @@ class AuthService {
   // User/Customer Authentication
   async loginUser(credentials) {
     try {
-      const response = await apiClient.post('/api/auth/login', credentials);
+      const response = await apiClient.post('/api/auth/user/login', credentials);
       
       // Handle the response structure from your backend
       if (response.data && response.data.data) {
@@ -31,6 +31,74 @@ class AuthService {
       return {
         success: false,
         message: error.response?.data?.message || error.message || 'Login failed',
+        error: error.response?.data?.errors || null
+      };
+    }
+  }
+
+  // Vendor Authentication
+  async loginVendor(credentials) {
+    try {
+      const response = await apiClient.post('/api/auth/vendor/login', credentials);
+      
+      // Handle the response structure from your backend
+      if (response.data && response.data.data) {
+        const { access_token, refresh_token, user } = response.data.data;
+        
+        // Set the auth token in localStorage for subsequent requests
+        setAuthToken(access_token);
+        
+        return {
+          success: true,
+          data: { 
+            token: access_token,
+            refreshToken: refresh_token,
+            user: user,
+            role: user.role || 'vendor'
+          },
+          message: response.data.message || 'Vendor login successful'
+        };
+      } else {
+        throw new Error('Invalid response format');
+      }
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || error.message || 'Vendor login failed',
+        error: error.response?.data?.errors || null
+      };
+    }
+  }
+
+  // Admin Authentication
+  async loginAdmin(credentials) {
+    try {
+      const response = await apiClient.post('/api/auth/admin/login', credentials);
+      
+      // Handle the response structure from your backend
+      if (response.data && response.data.data) {
+        const { access_token, refresh_token, user } = response.data.data;
+        
+        // Set the auth token in localStorage for subsequent requests
+        setAuthToken(access_token);
+        
+        return {
+          success: true,
+          data: { 
+            token: access_token,
+            refreshToken: refresh_token,
+            user: user,
+            role: user.role || 'admin'
+          },
+          message: response.data.message || 'Admin login successful'
+        };
+      } else {
+        throw new Error('Invalid response format');
+      }
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || error.message || 'Admin login failed',
         error: error.response?.data?.errors || null
       };
     }

@@ -27,7 +27,7 @@ const VendorLogin = () => {
     setError('');
 
     try {
-      const result = await authService.loginUser(formData);
+      const result = await authService.loginVendor(formData);
       
       if (result.success) {
         // Redirect to vendor dashboard

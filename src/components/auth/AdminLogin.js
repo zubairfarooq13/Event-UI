@@ -39,7 +39,7 @@ const AdminLogin = ({ onLogin, onSwitchToSignup }) => {
     
     try {
       // Login using auth service
-      const result = await authService.loginUser(data);
+      const result = await authService.loginAdmin(data);
       
       console.log('Login result:', result);
       
