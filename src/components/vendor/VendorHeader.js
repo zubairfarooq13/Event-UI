@@ -10,7 +10,8 @@ import {
   FaUserCircle,
   FaSignOutAlt,
   FaCog,
-  FaUser
+  FaUser,
+  FaQuestionCircle
 } from 'react-icons/fa';
 
 const VendorHeader = () => {
@@ -145,50 +146,79 @@ const VendorHeader = () => {
 
               {/* User Dropdown Menu */}
               {isUserMenuOpen && (
-                <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200">
-                  <div className="py-2">
-                    {/* User Info */}
-                    <div className="px-4 py-3 border-b border-gray-100">
-                      <p className="text-sm font-semibold text-gray-900">
-                        {getUserDisplayName()}
-                      </p>
-                      <p className="text-xs text-gray-500 mt-1">
-                        {user?.email || 'Vendor Account'}
-                      </p>
-                    </div>
-
+                <div className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-xl border border-gray-200">
+                  <div className="py-1">
                     {/* Menu Items */}
-                    <button
-                      onClick={() => {
-                        navigate('/vendor/profile');
-                        setIsUserMenuOpen(false);
-                      }}
-                      className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                    >
-                      <FaUser className="mr-3 text-gray-400" size={14} />
-                      My Profile
-                    </button>
-
                     <button
                       onClick={() => {
                         navigate('/vendor/settings');
                         setIsUserMenuOpen(false);
                       }}
-                      className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                      className="flex items-center w-full px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
                     >
-                      <FaCog className="mr-3 text-gray-400" size={14} />
+                      <FaCog className="mr-3 text-gray-400" size={16} />
                       Settings
                     </button>
 
-                    <div className="border-t border-gray-100 my-1"></div>
+                    <button
+                      onClick={() => {
+                        navigate('/vendor/account');
+                        setIsUserMenuOpen(false);
+                      }}
+                      className="flex items-center w-full px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                    >
+                      <FaUser className="mr-3 text-gray-400" size={16} />
+                      My account
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        navigate('/vendor/help');
+                        setIsUserMenuOpen(false);
+                      }}
+                      className="flex items-center w-full px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                    >
+                      <FaQuestionCircle className="mr-3 text-gray-400" size={16} />
+                      Help Centre
+                    </button>
 
                     <button
                       onClick={handleLogout}
-                      className="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                      className="flex items-center w-full px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
                     >
-                      <FaSignOutAlt className="mr-3 text-red-500" size={14} />
-                      Logout
+                      <FaSignOutAlt className="mr-3 text-gray-400" size={16} />
+                      Log out
                     </button>
+
+                    <div className="border-t border-gray-200 my-2"></div>
+
+                    {/* Switch to section */}
+                    <div className="px-4 py-2">
+                      <p className="text-xs text-gray-500 mb-2">Switch to</p>
+                      
+                      <button
+                        onClick={() => {
+                          // Switch to user account
+                          setIsUserMenuOpen(false);
+                          navigate('/');
+                        }}
+                        className="flex items-center w-full px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors rounded-md"
+                      >
+                        <div className="w-4 h-4 mr-3 border-2 border-gray-300 rounded-full flex items-center justify-center">
+                          <div className="w-2 h-2 bg-transparent rounded-full"></div>
+                        </div>
+                        User Account
+                      </button>
+
+                      <button
+                        className="flex items-center w-full px-3 py-2 text-sm text-teal-600 bg-teal-50 rounded-md mt-1"
+                      >
+                        <div className="w-4 h-4 mr-3 border-2 border-teal-600 rounded-full flex items-center justify-center">
+                          <div className="w-2 h-2 bg-teal-600 rounded-full"></div>
+                        </div>
+                        Venue Account
+                      </button>
+                    </div>
                   </div>
                 </div>
               )}

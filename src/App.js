@@ -14,6 +14,7 @@ import ListingDetail from './components/listing/ListingDetail';
 import AddSpaceWizard from './components/vendor/AddSpace/AddSpaceWizard';
 import VendorDashboard from './components/vendor/VendorDashboard';
 import VendorSpacesList from './components/vendor/VendorSpacesList';
+import VendorSettings from './components/vendor/Settings/VendorSettings';
 import { AuthContext, AuthProvider } from './contexts/AuthContext';  
 
 function App() {
@@ -39,6 +40,7 @@ function App() {
             <Route path="/vendor/spaces" element={<VendorSpacesList />} />
             <Route path="/vendor/add-space" element={<AddSpaceWizard />} />
             <Route path="/vendor/edit-space/:spaceId" element={<AddSpaceWizard />} />
+            <Route path="/vendor/settings" element={<VendorSettings />} />
           </Routes>
         </div>
       </Router>
