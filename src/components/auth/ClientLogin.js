@@ -30,8 +30,8 @@ const ClientLogin = () => {
       const result = await authService.loginUser(formData);
       
       if (result.success) {
-        // Redirect to home or user dashboard
-        navigate('/');
+        // Redirect to user enquiries page
+        navigate('/user/enquiries');
       } else {
         setError(result.message || 'Login failed. Please check your credentials.');
       }

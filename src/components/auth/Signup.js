@@ -32,8 +32,8 @@ const Signup = () => {
       const result = await authService.signupUser(formData);
       
       if (result.success) {
-        // Redirect to home or user dashboard
-        navigate('/');
+        // Redirect to user enquiries page
+        navigate('/user/enquiries');
       } else {
         setError(result.message || 'Signup failed. Please try again.');
       }

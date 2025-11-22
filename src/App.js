@@ -16,6 +16,9 @@ import VendorDashboard from './components/vendor/VendorDashboard';
 import VendorSpacesList from './components/vendor/VendorSpacesList';
 import VendorSettings from './components/vendor/Settings/VendorSettings';
 import VendorAccount from './components/vendor/Account/VendorAccount';
+import VendorHelpCenter from './components/vendor/Help/VendorHelpCenter';
+import UserEnquiries from './components/user/UserEnquiries';
+import UserFavourites from './components/user/UserFavourites';
 import { AuthContext, AuthProvider } from './contexts/AuthContext';  
 
 function App() {
@@ -36,6 +39,10 @@ function App() {
             <Route path="/venues" element={<ListingsPage />} />
             <Route path="/venues/:id" element={<ListingDetail />} />
             
+            {/* User Routes */}
+            <Route path="/user/enquiries" element={<UserEnquiries />} />
+            <Route path="/user/favourites" element={<UserFavourites />} />
+            
             {/* Vendor Routes */}
             <Route path="/vendor/dashboard" element={<VendorDashboard />} />
             <Route path="/vendor/spaces" element={<VendorSpacesList />} />
@@ -43,6 +50,7 @@ function App() {
             <Route path="/vendor/edit-space/:spaceId" element={<AddSpaceWizard />} />
             <Route path="/vendor/settings" element={<VendorSettings />} />
             <Route path="/vendor/account" element={<VendorAccount />} />
+            <Route path="/vendor/help" element={<VendorHelpCenter />} />
           </Routes>
         </div>
       </Router>
