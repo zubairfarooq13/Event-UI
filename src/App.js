@@ -2,7 +2,6 @@ import { UserProvider, useUser } from './contexts/AuthContext';
 import './App.css';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import LandingPage from './components/landing/LandingPage';
-import HomeSearch from './components/home/HomeSearch';
 import LoginLanding from './components/auth/LoginLanding';
 import ClientLogin from './components/auth/ClientLogin';
 import VendorLogin from './components/auth/VendorLogin';
@@ -28,7 +27,6 @@ function App() {
         <div className="App">
           <Routes>
             <Route path="/" element={<LandingPage />} />
-            <Route path="/search" element={<HomeSearch />} />
             <Route path="/login" element={<LoginLanding />} />
             <Route path="/login/user" element={<ClientLogin />} />
             <Route path="/login/vendor" element={<VendorLogin />} />

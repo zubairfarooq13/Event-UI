@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaGoogle, FaFacebook, FaUser, FaEnvelope, FaLock } from 'react-icons/fa';
 import { authService } from '../../services';
-import LandingHeader from '../landing/LandingHeader';
+import LandingHeader from '../common/headers/LandingHeader';
 
 const ClientLogin = () => {
   const navigate = useNavigate();

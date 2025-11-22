@@ -1,5 +1,5 @@
 import React from 'react';
-import LandingHeader from './LandingHeader';
+import LandingHeader from '../common/headers/LandingHeader';
 import HeroSection from './HeroSection';
 
 const LandingPage = () => {

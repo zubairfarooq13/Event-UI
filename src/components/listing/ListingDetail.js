@@ -9,7 +9,7 @@ import PricingSection from './PricingSection';
 import AmenitiesSection from './AmenitiesSection';
 import ReviewsSection from './ReviewsSection';
 import PackagesSection from './PackagesSection';
-import LandingHeader from '../landing/LandingHeader';
+import LandingHeader from '../common/headers/LandingHeader';
 import { ALL_GENERAL_FACILITIES, ALL_CATERING_FACILITIES, ALL_MUSIC_FACILITIES } from '../../constants/facilities';
 
 const ListingDetail = () => {

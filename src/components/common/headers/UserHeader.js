@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
-import { useAuth } from '../../contexts/AuthContext';
+import { useAuth } from '../../../contexts/AuthContext';
 import { FaBell, FaHeart, FaUserCircle, FaSignOutAlt, FaCog } from 'react-icons/fa';
 
 const UserHeader = () => {

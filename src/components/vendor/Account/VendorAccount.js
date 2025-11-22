@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import VendorHeader from '../VendorHeader';
+import VendorHeader from '../../common/headers/VendorHeader';
 import AccountDetailsTab from './AccountDetailsTab';
 import NotificationsTab from '../Notifications/NotificationsTab';
 

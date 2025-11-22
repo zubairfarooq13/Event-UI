@@ -1,5 +1,5 @@
 import React from 'react';
-import UserHeader from './UserHeader';
+import UserHeader from '../common/headers/UserHeader';
 import { FaHeart } from 'react-icons/fa';
 
 const UserFavourites = () => {

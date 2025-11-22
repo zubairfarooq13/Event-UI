@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FaGoogle, FaBuilding, FaEnvelope, FaLock } from 'react-icons/fa';
+import { FaGoogle, FaFacebook, FaBuilding, FaEnvelope, FaLock } from 'react-icons/fa';
 import { authService } from '../../services';
-import LandingHeader from '../landing/LandingHeader';
+import LandingHeader from '../common/headers/LandingHeader';
 
 const VendorLogin = () => {
   const navigate = useNavigate();

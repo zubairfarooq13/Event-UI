@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import UserHeader from './UserHeader';
+import UserHeader from '../common/headers/UserHeader';
 import { FaCalendar, FaClock, FaMapMarkerAlt } from 'react-icons/fa';
 
 const UserEnquiries = () => {

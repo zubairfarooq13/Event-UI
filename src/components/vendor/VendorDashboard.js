@@ -1,5 +1,5 @@
 import React from 'react';
-import VendorHeader from './VendorHeader';
+import VendorHeader from '../common/headers/VendorHeader';
 import VendorDashboardHome from './VendorDashboardHome';
 
 const VendorDashboard = () => {

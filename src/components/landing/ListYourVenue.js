@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaCheck, FaCalendarAlt, FaUsers, FaChartLine, FaChevronDown, FaChevronUp } from 'react-icons/fa';
-import LandingHeader from '../landing/LandingHeader';
+import LandingHeader from '../common/headers/LandingHeader';
 import VendorRegistrationModal from '../auth/VendorRegistrationModal';
 
 const ListYourVenue = () => {

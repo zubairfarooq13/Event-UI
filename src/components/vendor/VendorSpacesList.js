@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaPlus, FaEdit, FaEye, FaTrash, FaCheckCircle, FaExclamationCircle, FaBuilding } from 'react-icons/fa';
-import VendorHeader from './VendorHeader';
+import VendorHeader from '../common/headers/VendorHeader';
 
 const VendorSpacesList = () => {
   const navigate = useNavigate();

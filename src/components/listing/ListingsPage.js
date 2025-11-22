@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
-import Header from '../common/Header';
+import Header from '../common/headers/Header';
 import ListingCard from './ListingCard';
 import { spaceService } from '../../services';
-import LandingHeader from '../landing/LandingHeader';
+import LandingHeader from '../common/headers/LandingHeader';
 import VenueFilters from './VenueFilters';
 
 const ListingsPage = () => {

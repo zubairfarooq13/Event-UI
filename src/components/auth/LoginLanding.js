@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaUser, FaBuilding } from 'react-icons/fa';
-import LandingHeader from '../landing/LandingHeader';
+import LandingHeader from '../common/headers/LandingHeader';
 
 const LoginLanding = () => {
   const navigate = useNavigate();

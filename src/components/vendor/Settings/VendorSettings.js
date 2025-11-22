@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import VendorHeader from '../VendorHeader';
+import VendorHeader from '../../common/headers/VendorHeader';
 import { FaUsers, FaBuilding, FaTag, FaCrown } from 'react-icons/fa';
 import TeamMembersTab from './TeamMembersTab';
 import CompanyDetailsTab from './CompanyDetailsTab';
