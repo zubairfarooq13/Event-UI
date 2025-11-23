@@ -1,8 +1,12 @@
 import React, { useState } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { FaEye, FaEyeSlash, FaSignInAlt, FaUserShield, FaExclamationTriangle } from 'react-icons/fa';
 import { authService } from '../../services';
+import { getDefaultRedirectPath } from '../../constants/roles';
 
 const AdminLogin = ({ onLogin }) => {
+  const navigate = useNavigate();
+  const location = useLocation();
   const [formData, setFormData] = useState({
     email: '',
     password: ''
@@ -76,6 +80,9 @@ const AdminLogin = ({ onLogin }) => {
         if (onLogin) {
           onLogin(result.data);
         }
+        // Get return URL from location state or use role-based default
+        const from = location.state?.from?.pathname || getDefaultRedirectPath(result.data.role || 'admin');
+        navigate(from, { replace: true });
       } else {
         setError(result.message);
       }

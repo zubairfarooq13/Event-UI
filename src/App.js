@@ -18,7 +18,17 @@ import VendorHelpCenter from './components/vendor/Help/VendorHelpCenter';
 import UserEnquiries from './components/user/UserEnquiries';
 import UserFavourites from './components/user/UserFavourites';
 import UserAccount from './components/user/UserAccount';
-import { AuthProvider } from './contexts/AuthContext';  
+import AdminDashboard from './components/admin/AdminDashboard';
+import AdminAnalytics from './components/admin/AdminAnalytics';
+import VendorApprovals from './components/admin/VendorApprovals';
+import ManageListings from './components/admin/ManageListings';
+import BookingsManagement from './components/admin/BookingsManagement';
+import ProtectedRoute from './components/auth/ProtectedRoute';
+import RoleBasedRoute from './components/auth/RoleBasedRoute';
+import Unauthorized from './components/common/Unauthorized';
+import NotFound from './components/common/NotFound';
+import { AuthProvider } from './contexts/AuthContext';
+import ROLES from './constants/roles';  
 
 function App() {
   return (
@@ -26,6 +36,7 @@ function App() {
       <Router>
         <div className="App">
           <Routes>
+            {/* Public Routes */}
             <Route path="/" element={<LandingPage />} />
             <Route path="/login" element={<LoginLanding />} />
             <Route path="/login/user" element={<UserLogin />} />
@@ -33,23 +44,148 @@ function App() {
             <Route path="/list-your-venue" element={<ListYourVenue />} />
             <Route path="/register" element={<UserSignup />} />
             <Route path="/signup/user" element={<UserSignup />} />
-            <Route path="/profile" element={<ProfilePage />} />
             <Route path="/venues" element={<ListingsPage />} />
             <Route path="/venues/:id" element={<ListingDetail />} />
             
-            {/* User Routes */}
-            <Route path="/user/enquiries" element={<UserEnquiries />} />
-            <Route path="/user/favourites" element={<UserFavourites />} />
-            <Route path="/user/account" element={<UserAccount />} />
+            {/* Any Authenticated User Routes */}
+            <Route 
+              path="/profile" 
+              element={
+                <ProtectedRoute>
+                  <ProfilePage />
+                </ProtectedRoute>
+              } 
+            />
             
-            {/* Vendor Routes */}
-            <Route path="/vendor/dashboard" element={<VendorDashboard />} />
-            <Route path="/vendor/spaces" element={<VendorSpacesList />} />
-            <Route path="/vendor/add-space" element={<AddSpaceWizard />} />
-            <Route path="/vendor/edit-space/:spaceId" element={<AddSpaceWizard />} />
-            <Route path="/vendor/settings" element={<VendorSettings />} />
-            <Route path="/vendor/account" element={<VendorAccount />} />
-            <Route path="/vendor/help" element={<VendorHelpCenter />} />
+            {/* User/Customer Routes - Role: customer */}
+            <Route 
+              path="/user/enquiries" 
+              element={
+                <RoleBasedRoute allowedRoles={[ROLES.CUSTOMER]}>
+                  <UserEnquiries />
+                </RoleBasedRoute>
+              } 
+            />
+            <Route 
+              path="/user/favourites" 
+              element={
+                <RoleBasedRoute allowedRoles={[ROLES.CUSTOMER]}>
+                  <UserFavourites />
+                </RoleBasedRoute>
+              } 
+            />
+            <Route 
+              path="/user/account" 
+              element={
+                <RoleBasedRoute allowedRoles={[ROLES.CUSTOMER]}>
+                  <UserAccount />
+                </RoleBasedRoute>
+              } 
+            />
+            
+            {/* Vendor Routes - Role: vendor */}
+            <Route 
+              path="/vendor/dashboard" 
+              element={
+                <RoleBasedRoute allowedRoles={[ROLES.VENDOR]}>
+                  <VendorDashboard />
+                </RoleBasedRoute>
+              } 
+            />
+            <Route 
+              path="/vendor/spaces" 
+              element={
+                <RoleBasedRoute allowedRoles={[ROLES.VENDOR]}>
+                  <VendorSpacesList />
+                </RoleBasedRoute>
+              } 
+            />
+            <Route 
+              path="/vendor/add-space" 
+              element={
+                <RoleBasedRoute allowedRoles={[ROLES.VENDOR]}>
+                  <AddSpaceWizard />
+                </RoleBasedRoute>
+              } 
+            />
+            <Route 
+              path="/vendor/edit-space/:spaceId" 
+              element={
+                <RoleBasedRoute allowedRoles={[ROLES.VENDOR]}>
+                  <AddSpaceWizard />
+                </RoleBasedRoute>
+              } 
+            />
+            <Route 
+              path="/vendor/settings" 
+              element={
+                <RoleBasedRoute allowedRoles={[ROLES.VENDOR]}>
+                  <VendorSettings />
+                </RoleBasedRoute>
+              } 
+            />
+            <Route 
+              path="/vendor/account" 
+              element={
+                <RoleBasedRoute allowedRoles={[ROLES.VENDOR]}>
+                  <VendorAccount />
+                </RoleBasedRoute>
+              } 
+            />
+            <Route 
+              path="/vendor/help" 
+              element={
+                <RoleBasedRoute allowedRoles={[ROLES.VENDOR]}>
+                  <VendorHelpCenter />
+                </RoleBasedRoute>
+              } 
+            />
+            
+            {/* Admin Routes - Role: admin */}
+            <Route 
+              path="/admin/dashboard" 
+              element={
+                <RoleBasedRoute allowedRoles={[ROLES.ADMIN]}>
+                  <AdminDashboard />
+                </RoleBasedRoute>
+              } 
+            />
+            <Route 
+              path="/admin/analytics" 
+              element={
+                <RoleBasedRoute allowedRoles={[ROLES.ADMIN]}>
+                  <AdminAnalytics />
+                </RoleBasedRoute>
+              } 
+            />
+            <Route 
+              path="/admin/vendor-approvals" 
+              element={
+                <RoleBasedRoute allowedRoles={[ROLES.ADMIN]}>
+                  <VendorApprovals />
+                </RoleBasedRoute>
+              } 
+            />
+            <Route 
+              path="/admin/manage-listings" 
+              element={
+                <RoleBasedRoute allowedRoles={[ROLES.ADMIN]}>
+                  <ManageListings />
+                </RoleBasedRoute>
+              } 
+            />
+            <Route 
+              path="/admin/bookings" 
+              element={
+                <RoleBasedRoute allowedRoles={[ROLES.ADMIN]}>
+                  <BookingsManagement />
+                </RoleBasedRoute>
+              } 
+            />
+            
+            {/* Error Routes */}
+            <Route path="/unauthorized" element={<Unauthorized />} />
+            <Route path="*" element={<NotFound />} />
           </Routes>
         </div>
       </Router>

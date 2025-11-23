@@ -117,6 +117,7 @@ const UserAccount = () => {
       const formData = new FormData();
       formData.append('name', profileData.name);
       formData.append('email', profileData.email);
+      formData.append('phone', profileData.phone);
       
       if (profileData.profilePhoto) {
         formData.append('profile_photo', profileData.profilePhoto);
@@ -337,7 +338,7 @@ const UserAccount = () => {
                         name="phone"
                         value={profileData.phone}
                         onChange={handleInputChange}
-                        placeholder="+923365929305"
+                        placeholder="+92xxxxxxxxxx"
                         className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all outline-none"
                       />
                     </div>

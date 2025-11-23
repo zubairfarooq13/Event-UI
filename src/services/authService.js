@@ -11,8 +11,11 @@ class AuthService {
       if (response.data && response.data.data) {
         const { access_token, refresh_token, user } = response.data.data;
         
-        // Set the auth token in localStorage for subsequent requests
+        // Set the auth token and refresh token in localStorage
         setAuthToken(access_token);
+        if (refresh_token) {
+          localStorage.setItem('refreshToken', refresh_token);
+        }
         
         return {
           success: true,
@@ -44,8 +47,11 @@ class AuthService {
       if (response.data && response.data.data) {
         const { access_token, refresh_token, user } = response.data.data;
         
-        // Set the auth token in localStorage for subsequent requests
+        // Set the auth token and refresh token in localStorage
         setAuthToken(access_token);
+        if (refresh_token) {
+          localStorage.setItem('refreshToken', refresh_token);
+        }
         
         return {
           success: true,
@@ -78,8 +84,11 @@ class AuthService {
       if (response.data && response.data.data) {
         const { access_token, refresh_token, user } = response.data.data;
         
-        // Set the auth token in localStorage for subsequent requests
+        // Set the auth token and refresh token in localStorage
         setAuthToken(access_token);
+        if (refresh_token) {
+          localStorage.setItem('refreshToken', refresh_token);
+        }
         
         return {
           success: true,
@@ -112,8 +121,11 @@ class AuthService {
       if (response.data && response.data.data) {
         const { access_token, refresh_token, user } = response.data.data;
         
-        // Set the auth token in localStorage for subsequent requests
+        // Set the auth token and refresh token in localStorage
         setAuthToken(access_token);
+        if (refresh_token) {
+          localStorage.setItem('refreshToken', refresh_token);
+        }
         
         return {
           success: true,
@@ -145,8 +157,11 @@ class AuthService {
       if (response.data && response.data.data) {
         const { access_token, refresh_token, user } = response.data.data;
         
-        // Set the auth token in localStorage for subsequent requests
+        // Set the auth token and refresh token in localStorage
         setAuthToken(access_token);
+        if (refresh_token) {
+          localStorage.setItem('refreshToken', refresh_token);
+        }
         
         return {
           success: true,
@@ -179,6 +194,9 @@ class AuthService {
     } finally {
       // Always clear local auth data
       clearAuthData();
+      localStorage.removeItem('refreshToken');
+      localStorage.removeItem('user');
+      localStorage.removeItem('userRole');
       return {
         success: true,
         message: 'Logged out successfully'

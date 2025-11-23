@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { isTokenExpired, willExpireSoon } from '../utils/tokenUtils';
 
 // Base URL for the backend API
 const BASE_URL = process.env.REACT_APP_API_URL || 'http://127.0.0.1:5000';
@@ -12,13 +13,110 @@ const apiClient = axios.create({
   },
 });
 
-// Request interceptor to add auth token
+// Flag to prevent multiple refresh attempts
+let isRefreshing = false;
+let failedQueue = [];
+
+const processQueue = (error, token = null) => {
+  failedQueue.forEach(prom => {
+    if (error) {
+      prom.reject(error);
+    } else {
+      prom.resolve(token);
+    }
+  });
+  
+  failedQueue = [];
+};
+
+// Function to refresh the access token
+const refreshAccessToken = async () => {
+  try {
+    const refreshToken = localStorage.getItem('refreshToken');
+    if (!refreshToken) {
+      throw new Error('No refresh token available');
+    }
+
+    const response = await axios.post(`${BASE_URL}/api/auth/refresh`, {
+      refresh_token: refreshToken
+    });
+
+    if (response.data && response.data.data) {
+      const { access_token, refresh_token: newRefreshToken } = response.data.data;
+      
+      localStorage.setItem('authToken', access_token);
+      if (newRefreshToken) {
+        localStorage.setItem('refreshToken', newRefreshToken);
+      }
+      
+      return access_token;
+    }
+    
+    throw new Error('Invalid refresh response');
+  } catch (error) {
+    // Refresh failed, clear auth data
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('refreshToken');
+    localStorage.removeItem('user');
+    localStorage.removeItem('userRole');
+    throw error;
+  }
+};
+
+// Request interceptor to add auth token and check expiration
 apiClient.interceptors.request.use(
-  (config) => {
+  async (config) => {
     // Get token from localStorage
-    const token = localStorage.getItem('authToken');
+    let token = localStorage.getItem('authToken');
     
     if (token) {
+      // Check if token is expired or will expire soon
+      if (isTokenExpired(token)) {
+        console.warn('Token is expired, attempting refresh...');
+        
+        if (!isRefreshing) {
+          isRefreshing = true;
+          try {
+            token = await refreshAccessToken();
+            isRefreshing = false;
+            processQueue(null, token);
+          } catch (error) {
+            isRefreshing = false;
+            processQueue(error, null);
+            // Redirect to login
+            if (!window.location.pathname.includes('/login')) {
+              window.location.href = '/login';
+            }
+            return Promise.reject(error);
+          }
+        } else {
+          // Wait for the current refresh to complete
+          return new Promise((resolve, reject) => {
+            failedQueue.push({ resolve, reject });
+          }).then(token => {
+            config.headers.Authorization = `Bearer ${token}`;
+            return config;
+          }).catch(error => {
+            return Promise.reject(error);
+          });
+        }
+      } else if (willExpireSoon(token, 5)) {
+        // Token will expire in less than 5 minutes, refresh proactively
+        console.log('Token expiring soon, refreshing proactively...');
+        if (!isRefreshing) {
+          isRefreshing = true;
+          refreshAccessToken()
+            .then(newToken => {
+              isRefreshing = false;
+              processQueue(null, newToken);
+            })
+            .catch(error => {
+              isRefreshing = false;
+              processQueue(error, null);
+            });
+        }
+      }
+      
       config.headers.Authorization = `Bearer ${token}`;
     }
     
@@ -47,7 +145,9 @@ apiClient.interceptors.response.use(
     
     return response;
   },
-  (error) => {
+  async (error) => {
+    const originalRequest = error.config;
+    
     // Handle common errors
     if (error.response) {
       // Server responded with error status
@@ -63,12 +163,57 @@ apiClient.interceptors.response.use(
       switch (status) {
         case 401:
           // Unauthorized - token expired or invalid
-          localStorage.removeItem('authToken');
-          localStorage.removeItem('userRole');
-          localStorage.removeItem('userData');
+          // Try to refresh token once if not already retried
+          if (!originalRequest._retry) {
+            originalRequest._retry = true;
+            
+            if (isRefreshing) {
+              // Wait for the current refresh to complete
+              return new Promise((resolve, reject) => {
+                failedQueue.push({ resolve, reject });
+              }).then(token => {
+                originalRequest.headers.Authorization = `Bearer ${token}`;
+                return apiClient(originalRequest);
+              }).catch(err => {
+                return Promise.reject(err);
+              });
+            }
+            
+            isRefreshing = true;
+            
+            try {
+              const newToken = await refreshAccessToken();
+              isRefreshing = false;
+              processQueue(null, newToken);
+              
+              originalRequest.headers.Authorization = `Bearer ${newToken}`;
+              return apiClient(originalRequest);
+            } catch (refreshError) {
+              isRefreshing = false;
+              processQueue(refreshError, null);
+              
+              // Clear auth data
+              localStorage.removeItem('authToken');
+              localStorage.removeItem('refreshToken');
+              localStorage.removeItem('user');
+              localStorage.removeItem('userRole');
+              
+              // Redirect to login if not already there
+              if (!window.location.pathname.includes('/login')) {
+                window.location.href = '/login';
+              }
+              
+              return Promise.reject(refreshError);
+            }
+          }
           
-          // Redirect to login if not already there
-          if (!window.location.pathname.includes('/login') && !window.location.pathname.includes('/admin')) {
+          // If already retried, clear auth and redirect
+          localStorage.removeItem('authToken');
+          localStorage.removeItem('refreshToken');
+          localStorage.removeItem('user');
+          localStorage.removeItem('userRole');
+          
+          if (!window.location.pathname.includes('/login')) {
             window.location.href = '/login';
           }
           break;
@@ -76,6 +221,10 @@ apiClient.interceptors.response.use(
         case 403:
           // Forbidden - insufficient permissions
           console.error('Access denied: Insufficient permissions');
+          // Optionally redirect to unauthorized page
+          if (!window.location.pathname.includes('/unauthorized')) {
+            window.location.href = '/unauthorized';
+          }
           break;
           
         case 404:

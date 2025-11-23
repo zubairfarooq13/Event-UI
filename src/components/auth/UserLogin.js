@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { FaGoogle, FaFacebook, FaUser, FaEnvelope, FaLock } from 'react-icons/fa';
 import { authService } from '../../services';
+import { getDefaultRedirectPath } from '../../constants/roles';
 import LandingHeader from '../common/headers/LandingHeader';
 
 const UserLogin = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [formData, setFormData] = useState({
@@ -30,8 +32,9 @@ const UserLogin = () => {
       const result = await authService.loginUser(formData);
       
       if (result.success) {
-        // Redirect to user enquiries page
-        navigate('/user/enquiries');
+        // Get return URL from location state or use role-based default
+        const from = location.state?.from?.pathname || getDefaultRedirectPath(result.data.role || 'customer');
+        navigate(from, { replace: true });
       } else {
         setError(result.message || 'Login failed. Please check your credentials.');
       }
