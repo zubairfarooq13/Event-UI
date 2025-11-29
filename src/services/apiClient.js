@@ -66,10 +66,16 @@ const refreshAccessToken = async () => {
 // Request interceptor to add auth token and check expiration
 apiClient.interceptors.request.use(
   async (config) => {
+    // Skip token refresh for auth endpoints (login, signup, refresh)
+    const authEndpoints = ['/api/auth/login', '/api/auth/user/login', '/api/auth/vendor/login', 
+                          '/api/auth/admin/login', '/api/auth/signup', '/api/auth/user/signup', 
+                          '/api/auth/vendor/signup', '/api/auth/refresh'];
+    const isAuthEndpoint = authEndpoints.some(endpoint => config.url?.includes(endpoint));
+    
     // Get token from localStorage
     let token = localStorage.getItem('authToken');
     
-    if (token) {
+    if (token && !isAuthEndpoint) {
       // Check if token is expired or will expire soon
       if (isTokenExpired(token)) {
         console.warn('Token is expired, attempting refresh...');
@@ -162,6 +168,17 @@ apiClient.interceptors.response.use(
       // Handle specific status codes
       switch (status) {
         case 401:
+          // Skip token refresh for auth endpoints
+          const authEndpoints = ['/api/auth/login', '/api/auth/user/login', '/api/auth/vendor/login', 
+                                '/api/auth/admin/login', '/api/auth/signup', '/api/auth/user/signup', 
+                                '/api/auth/vendor/signup', '/api/auth/refresh'];
+          const isAuthEndpoint = authEndpoints.some(endpoint => originalRequest.url?.includes(endpoint));
+          
+          // If it's an auth endpoint, just return the error (invalid credentials, etc.)
+          if (isAuthEndpoint) {
+            return Promise.reject(error);
+          }
+          
           // Unauthorized - token expired or invalid
           // Try to refresh token once if not already retried
           if (!originalRequest._retry) {

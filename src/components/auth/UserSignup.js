@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaGoogle, FaFacebook, FaUser, FaEnvelope, FaLock } from 'react-icons/fa';
-import { authService } from '../../services';
+import { useAuth } from '../../contexts/AuthContext';
+import ROLES from '../../constants/roles';
 import LandingHeader from '../common/headers/LandingHeader';
 
 const UserSignup = () => {
   const navigate = useNavigate();
+  const { register } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [acceptMarketing, setAcceptMarketing] = useState(false);
@@ -29,13 +31,13 @@ const UserSignup = () => {
     setError('');
 
     try {
-      const result = await authService.signupUser(formData);
+      const result = await register(formData, ROLES.CUSTOMER);
       
       if (result.success) {
         // Redirect to user enquiries page
         navigate('/user/enquiries');
       } else {
-        setError(result.message || 'Signup failed. Please try again.');
+        setError(result.error || 'Signup failed. Please try again.');
       }
     } catch (err) {
       setError('An error occurred. Please try again.');

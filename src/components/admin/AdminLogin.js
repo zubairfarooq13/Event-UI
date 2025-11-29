@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { FaEye, FaEyeSlash, FaSignInAlt, FaUserShield, FaExclamationTriangle } from 'react-icons/fa';
-import { authService } from '../../services';
-import { getDefaultRedirectPath } from '../../constants/roles';
+import { useAuth } from '../../contexts/AuthContext';
+import ROLES, { getDefaultRedirectPath } from '../../constants/roles';
 
 const AdminLogin = ({ onLogin }) => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { login } = useAuth();
   const [formData, setFormData] = useState({
     email: '',
     password: ''
@@ -69,11 +70,8 @@ const AdminLogin = ({ onLogin }) => {
     setError('');
 
     try {
-      // Use auth service for admin login
-      const result = await authService.loginAdmin({
-        email: formData.email,
-        password: formData.password
-      });
+      // Use auth context for admin login
+      const result = await login(formData.email, formData.password, ROLES.ADMIN);
 
       if (result.success) {
         // Call the onLogin callback to update authentication state
@@ -81,10 +79,10 @@ const AdminLogin = ({ onLogin }) => {
           onLogin(result.data);
         }
         // Get return URL from location state or use role-based default
-        const from = location.state?.from?.pathname || getDefaultRedirectPath(result.data.role || 'admin');
+        const from = location.state?.from?.pathname || getDefaultRedirectPath(ROLES.ADMIN);
         navigate(from, { replace: true });
       } else {
-        setError(result.message);
+        setError(result.error || result.message || 'Login failed');
       }
     } catch (err) {
       setError('Login failed. Please check your connection and try again.');

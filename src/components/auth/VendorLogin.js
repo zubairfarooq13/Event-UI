@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { FaGoogle, FaFacebook, FaBuilding, FaEnvelope, FaLock } from 'react-icons/fa';
-import { authService } from '../../services';
-import { getDefaultRedirectPath } from '../../constants/roles';
+import { useAuth } from '../../contexts/AuthContext';
+import ROLES, { getDefaultRedirectPath } from '../../constants/roles';
 import LandingHeader from '../common/headers/LandingHeader';
 
 const VendorLogin = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { login } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [formData, setFormData] = useState({
@@ -29,14 +30,14 @@ const VendorLogin = () => {
     setError('');
 
     try {
-      const result = await authService.loginVendor(formData);
+      const result = await login(formData.email, formData.password, ROLES.VENDOR);
       
       if (result.success) {
         // Get return URL from location state or use role-based default
-        const from = location.state?.from?.pathname || getDefaultRedirectPath(result.data.role || 'vendor');
+        const from = location.state?.from?.pathname || getDefaultRedirectPath(ROLES.VENDOR);
         navigate(from, { replace: true });
       } else {
-        setError(result.message || 'Login failed. Please check your credentials.');
+        setError(result.error || 'Login failed. Please check your credentials.');
       }
     } catch (err) {
       setError('An error occurred. Please try again.');

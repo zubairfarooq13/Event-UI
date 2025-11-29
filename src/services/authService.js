@@ -11,12 +11,7 @@ class AuthService {
       if (response.data && response.data.data) {
         const { access_token, refresh_token, user } = response.data.data;
         
-        // Set the auth token and refresh token in localStorage
-        setAuthToken(access_token);
-        if (refresh_token) {
-          localStorage.setItem('refreshToken', refresh_token);
-        }
-        
+        // AuthContext handles token storage, just return the data
         return {
           success: true,
           data: { 
@@ -47,12 +42,7 @@ class AuthService {
       if (response.data && response.data.data) {
         const { access_token, refresh_token, user } = response.data.data;
         
-        // Set the auth token and refresh token in localStorage
-        setAuthToken(access_token);
-        if (refresh_token) {
-          localStorage.setItem('refreshToken', refresh_token);
-        }
-        
+        // AuthContext handles token storage, just return the data
         return {
           success: true,
           data: { 
@@ -84,12 +74,7 @@ class AuthService {
       if (response.data && response.data.data) {
         const { access_token, refresh_token, user } = response.data.data;
         
-        // Set the auth token and refresh token in localStorage
-        setAuthToken(access_token);
-        if (refresh_token) {
-          localStorage.setItem('refreshToken', refresh_token);
-        }
-        
+        // AuthContext handles token storage, just return the data
         return {
           success: true,
           data: { 
@@ -121,12 +106,7 @@ class AuthService {
       if (response.data && response.data.data) {
         const { access_token, refresh_token, user } = response.data.data;
         
-        // Set the auth token and refresh token in localStorage
-        setAuthToken(access_token);
-        if (refresh_token) {
-          localStorage.setItem('refreshToken', refresh_token);
-        }
-        
+        // AuthContext handles token storage, just return the data
         return {
           success: true,
           data: { 
@@ -157,12 +137,7 @@ class AuthService {
       if (response.data && response.data.data) {
         const { access_token, refresh_token, user } = response.data.data;
         
-        // Set the auth token and refresh token in localStorage
-        setAuthToken(access_token);
-        if (refresh_token) {
-          localStorage.setItem('refreshToken', refresh_token);
-        }
-        
+        // AuthContext handles token storage, just return the data
         return {
           success: true,
           data: { 
@@ -192,11 +167,8 @@ class AuthService {
     } catch (error) {
       console.warn('Logout API call failed, but clearing local data anyway');
     } finally {
-      // Always clear local auth data
+      // Clear local auth data (AuthContext will handle its own cleanup via logout())
       clearAuthData();
-      localStorage.removeItem('refreshToken');
-      localStorage.removeItem('user');
-      localStorage.removeItem('userRole');
       return {
         success: true,
         message: 'Logged out successfully'
@@ -212,9 +184,7 @@ class AuthService {
       if (response.data && response.data.data) {
         const { access_token, refresh_token, user } = response.data.data;
         
-        // Set the new auth token in localStorage
-        setAuthToken(access_token);
-        
+        // Return the new tokens (apiClient interceptor handles storage)
         return {
           success: true,
           data: { 

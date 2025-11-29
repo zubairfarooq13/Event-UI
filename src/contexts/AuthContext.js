@@ -53,21 +53,41 @@ export const AuthProvider = ({ children }) => {
     checkAuth();
   }, []);
 
-  const login = async (email, password) => {
+  // Common function to handle authentication success
+  const handleAuthSuccess = (access_token, userData, userRole) => {
+    const finalRole = userRole || userData.role || ROLES.CUSTOMER;
+    
+    setToken(access_token);
+    setUser(userData);
+    setRole(finalRole);
+    
+    localStorage.setItem('authToken', access_token);
+    localStorage.setItem('user', JSON.stringify(userData));
+    localStorage.setItem('userRole', finalRole);
+  };
+
+  // Generic login function that accepts role-specific parameters
+  const login = async (email, password, userRole = ROLES.CUSTOMER) => {
     try {
-      const result = await authService.loginUser({ email, password });
+      let result;
+      
+      // Call appropriate service method based on role
+      switch (userRole) {
+        case ROLES.ADMIN:
+          result = await authService.loginAdmin({ email, password });
+          break;
+        case ROLES.VENDOR:
+          result = await authService.loginVendor({ email, password });
+          break;
+        case ROLES.CUSTOMER:
+        default:
+          result = await authService.loginUser({ email, password });
+          break;
+      }
 
       if (result && result.success) {
-        const { token: access_token, user: userData, role: userRole } = result.data;
-        const finalRole = userRole || userData.role || 'customer';
-        
-        setToken(access_token);
-        setUser(userData);
-        setRole(finalRole);
-        
-        localStorage.setItem('authToken', access_token);
-        localStorage.setItem('user', JSON.stringify(userData));
-        localStorage.setItem('userRole', finalRole);
+        const { token: token, user: userData, role: role } = result.data;
+        handleAuthSuccess(token, userData, role || userRole);
       }
 
       return result;
@@ -80,21 +100,25 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const register = async (userData) => {
+  // Generic signup function that accepts role-specific parameters
+  const register = async (userData, userRole = ROLES.CUSTOMER) => {
     try {
-      const result = await authService.signupUser(userData);
+      let result;
+      
+      // Call appropriate service method based on role
+      switch (userRole) {
+        case ROLES.VENDOR:
+          result = await authService.signupVendor(userData);
+          break;
+        case ROLES.CUSTOMER:
+        default:
+          result = await authService.signupUser(userData);
+          break;
+      }
       
       if (result && result.success) {
-        const { token: access_token, user: userInfo, role: userRole } = result.data;
-        const finalRole = userRole || userInfo.role || 'customer';
-        
-        setToken(access_token);
-        setUser(userInfo);
-        setRole(finalRole);
-        
-        localStorage.setItem('authToken', access_token);
-        localStorage.setItem('user', JSON.stringify(userInfo));
-        localStorage.setItem('userRole', finalRole);
+        const { token: access_token, user: userInfo, role: responseRole } = result.data;
+        handleAuthSuccess(access_token, userInfo, responseRole || userRole);
       }
       
       return result;
@@ -165,6 +189,7 @@ export const AuthProvider = ({ children }) => {
     isCustomer,
     isVendor,
     isAdmin,
+    contextLogout: logout
   };
 
   return (
@@ -173,8 +198,3 @@ export const AuthProvider = ({ children }) => {
     </AuthContext.Provider>
   );
 };
-
-export const useUser = useAuth;
-export const UserProvider = AuthProvider;
-
-export default AuthContext;

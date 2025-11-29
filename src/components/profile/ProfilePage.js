@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import Card from '../common/Card';
 import Button from '../common/Button';
-import { useUser } from '../../contexts/AuthContext';
+import { useAuth } from '../../contexts/AuthContext';
 import { authService } from '../../services';
 
 const ProfilePage = () => {
-  const { user, logout: contextLogout, updateUser } = useUser();
+    const { user, updateUser, contextLogout } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
