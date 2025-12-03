@@ -337,6 +337,34 @@ class AuthService {
       };
     }
   }
+
+  // Role Management
+  async checkRole(email, role) {
+    try {
+      const response = await apiClient.post('/api/auth/check-role', {
+        email,
+        role
+      });
+      
+      // Handle the response structure from your backend
+      if (response.data) {
+        return {
+          success: true,
+          data: response.data.data || response.data,
+          message: response.data.message || 'Role check completed'
+        };
+      } else {
+        throw new Error('Invalid response format');
+      }
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || error.message || 'Role check failed',
+        error: error.response?.data?.errors || null,
+        data: error.response?.data?.data || null
+      };
+    }
+  }
 }
 
 // Create and export a singleton instance

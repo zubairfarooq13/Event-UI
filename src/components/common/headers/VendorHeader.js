@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../../contexts/AuthContext';
+import ROLES from '../../../constants/roles';
 import { 
   FaBell, 
   FaCalendarCheck, 
@@ -16,7 +17,7 @@ import {
 
 const VendorHeader = () => {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
-  const { user, logout } = useAuth();
+  const { user, logout, switchRole } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const userMenuRef = useRef(null);
@@ -58,6 +59,31 @@ const VendorHeader = () => {
     await logout();
     setIsUserMenuOpen(false);
     navigate('/');
+  };
+
+  const handleSwitchToCustomer = async () => {
+    setIsUserMenuOpen(false);
+    
+    try {
+      const result = await switchRole(ROLES.CUSTOMER);
+      
+      if (result.success) {
+        // Navigate to user dashboard
+        navigate('/user/enquiries');
+        // Reload to refresh the UI with new role
+        window.location.reload();
+      } else if (result.needsSignup) {
+        // No customer account found, redirect to signup
+        if (window.confirm(result.error || 'No customer account found. Would you like to create one?')) {
+          navigate('/signup/user');
+        }
+      } else {
+        alert(result.error || 'Failed to switch to customer dashboard.');
+      }
+    } catch (error) {
+      console.error('Error switching to customer:', error);
+      alert('Failed to switch to customer dashboard. Please try again.');
+    }
   };
 
   // Close user menu when clicking outside
@@ -197,11 +223,7 @@ const VendorHeader = () => {
                       <p className="text-xs text-gray-500 mb-2">Switch to</p>
                       
                       <button
-                        onClick={() => {
-                          // Switch to user account
-                          setIsUserMenuOpen(false);
-                          navigate('/');
-                        }}
+                        onClick={handleSwitchToCustomer}
                         className="flex items-center w-full px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors rounded-md"
                       >
                         <div className="w-4 h-4 mr-3 border-2 border-gray-300 rounded-full flex items-center justify-center">

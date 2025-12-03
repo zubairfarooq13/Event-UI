@@ -9,7 +9,7 @@ import PricingSection from './PricingSection';
 import AmenitiesSection from './AmenitiesSection';
 import ReviewsSection from './ReviewsSection';
 import PackagesSection from './PackagesSection';
-import LandingHeader from '../common/headers/LandingHeader';
+import SmartHeader from '../common/headers/SmartHeader';
 import { ALL_GENERAL_FACILITIES, ALL_CATERING_FACILITIES, ALL_MUSIC_FACILITIES } from '../../constants/facilities';
 
 const ListingDetail = () => {
@@ -324,7 +324,7 @@ The venue features beautiful fabric draping, comfortable seating arrangements, a
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <LandingHeader />
+        <SmartHeader />
         <div className="flex items-center justify-center min-h-[60vh]">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-600 mx-auto mb-4"></div>
@@ -338,7 +338,7 @@ The venue features beautiful fabric draping, comfortable seating arrangements, a
   if (error) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <LandingHeader />
+        <SmartHeader />
         <div className="flex items-center justify-center min-h-[60vh]">
           <div className="text-center">
             <div className="text-red-500 text-xl mb-4">⚠️</div>
@@ -358,7 +358,7 @@ The venue features beautiful fabric draping, comfortable seating arrangements, a
   if (!venue) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <LandingHeader />
+        <SmartHeader />
         <div className="flex items-center justify-center min-h-[60vh]">
           <div className="text-center">
             <p className="text-gray-600 mb-4">Space not found</p>
@@ -376,7 +376,7 @@ The venue features beautiful fabric draping, comfortable seating arrangements, a
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <LandingHeader />
+      <SmartHeader />
       {/* Breadcrumb */}
       <div className="bg-white border-b border-gray-200 mt-16">
         <div className="max-w-[1600px] mx-auto px-4 py-3">

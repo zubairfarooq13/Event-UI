@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
-import Header from '../common/headers/Header';
 import ListingCard from './ListingCard';
 import { spaceService } from '../../services';
-import LandingHeader from '../common/headers/LandingHeader';
+import SmartHeader from '../common/headers/SmartHeader';
 import VenueFilters from './VenueFilters';
 
 const ListingsPage = () => {
@@ -147,7 +146,7 @@ const ListingsPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <LandingHeader />
+      <SmartHeader />
       <VenueFilters 
         onFilterChange={handleFilterChange}
         initialFilters={currentFilters}

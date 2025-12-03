@@ -1,11 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '../../../contexts/AuthContext';
+import ROLES from '../../../constants/roles';
 import { FaBell, FaHeart, FaUserCircle, FaSignOutAlt, FaExchangeAlt, FaUser, FaChevronDown } from 'react-icons/fa';
 
 const UserHeader = () => {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
-  const { user, logout } = useAuth();
+  const { user, logout, switchRole } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const userMenuRef = useRef(null);
@@ -16,12 +17,28 @@ const UserHeader = () => {
     navigate('/');
   };
 
-  const handleSwitchTo = (role) => {
+  const handleSwitchToVendor = async () => {
     setIsUserMenuOpen(false);
-    if (role === 'vendor') {
-      navigate('/vendor/dashboard');
-    } else if (role === 'admin') {
-      navigate('/admin/dashboard');
+    
+    try {
+      const result = await switchRole(ROLES.VENDOR);
+      
+      if (result.success) {
+        // Navigate to vendor dashboard
+        navigate('/vendor/dashboard');
+        // Reload to refresh the UI with new role
+        window.location.reload();
+      } else if (result.needsSignup) {
+        // No vendor account found, redirect to signup
+        if (window.confirm(result.error || 'No vendor account found. Would you like to create one?')) {
+          navigate('/vendor/add-space');
+        }
+      } else {
+        alert(result.error || 'Failed to switch to vendor dashboard.');
+      }
+    } catch (error) {
+      console.error('Error switching to vendor:', error);
+      alert('Failed to switch to vendor dashboard. Please try again.');
     }
   };
 
@@ -53,7 +70,7 @@ const UserHeader = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
-          <Link to="/user/enquiries" className="flex items-center">
+          <Link to="/" className="flex items-center">
             <div className="grid grid-cols-2 gap-0.5 w-6 h-6">
               <div className="bg-teal-500 rounded-sm"></div>
               <div className="bg-teal-600 rounded-sm"></div>
@@ -126,7 +143,7 @@ const UserHeader = () => {
                   <div className="px-4 py-2">
                     <p className="text-xs text-gray-500 mb-2">Switch to</p>
                     <button
-                      onClick={() => handleSwitchTo('vendor')}
+                      onClick={handleSwitchToVendor}
                       className="flex items-center w-full px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded transition-colors"
                     >
                       <FaExchangeAlt className="mr-2 text-gray-400" size={14} />

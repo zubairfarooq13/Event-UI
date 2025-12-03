@@ -174,6 +174,76 @@ export const AuthProvider = ({ children }) => {
   const isVendor = () => hasRole(ROLES.VENDOR);
   const isAdmin = () => hasRole(ROLES.ADMIN);
 
+  // Check if user has account with specific role
+  const checkRole = async (targetRole) => {
+    if (!user || !user.email) {
+      return {
+        success: false,
+        error: 'No user logged in'
+      };
+    }
+
+    try {
+      const result = await authService.checkRole(user.email, targetRole);
+      return result;
+    } catch (error) {
+      console.error('Role check error:', error);
+      return {
+        success: false,
+        error: error.message || 'Role check failed'
+      };
+    }
+  };
+
+  // Switch to a different role dashboard (without password)
+  const switchRole = async (targetRole) => {
+    if (!user || !user.email) {
+      return {
+        success: false,
+        error: 'No user logged in'
+      };
+    }
+
+    try {
+      // First check if account exists with target role
+      const roleCheck = await checkRole(targetRole);
+      
+      if (!roleCheck.success) {
+        return roleCheck;
+      }
+
+      // If account doesn't exist with target role
+      if (roleCheck.data && roleCheck.data.available === false) {
+        return {
+          success: false,
+          error: roleCheck.data.message || `No ${targetRole} account found with this email`,
+          needsSignup: true,
+          targetRole: targetRole
+        };
+      }
+
+      // Account exists, update role in state and localStorage
+      const updatedUser = { ...user, role: targetRole };
+      setUser(updatedUser);
+      setRole(targetRole);
+      
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+      localStorage.setItem('userRole', targetRole);
+      
+      return {
+        success: true,
+        message: `Successfully switched to ${targetRole} dashboard`,
+        data: { user: updatedUser, role: targetRole }
+      };
+    } catch (error) {
+      console.error('Switch role error:', error);
+      return {
+        success: false,
+        error: error.message || 'Failed to switch role'
+      };
+    }
+  };
+
   const value = {
     user,
     token,
@@ -189,6 +259,8 @@ export const AuthProvider = ({ children }) => {
     isCustomer,
     isVendor,
     isAdmin,
+    checkRole,
+    switchRole,
     contextLogout: logout
   };
 

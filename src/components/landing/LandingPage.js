@@ -1,11 +1,11 @@
 import React from 'react';
-import LandingHeader from '../common/headers/LandingHeader';
+import SmartHeader from '../common/headers/SmartHeader';
 import HeroSection from './HeroSection';
 
 const LandingPage = () => {
   return (
     <div>
-      <LandingHeader />
+      <SmartHeader />
       <HeroSection />
     </div>
   );
