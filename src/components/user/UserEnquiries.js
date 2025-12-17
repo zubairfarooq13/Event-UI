@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import UserHeader from '../common/headers/UserHeader';
 import { FaCalendar, FaClock, FaMapMarkerAlt } from 'react-icons/fa';
 
 const UserEnquiries = () => {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('current');
 
   // Sample data - replace with API call
@@ -73,7 +75,11 @@ const UserEnquiries = () => {
           {activeTab === 'current' && currentEnquiries.length > 0 && (
             <div className="space-y-6">
               {currentEnquiries.map((enquiry) => (
-                <div key={enquiry.id} className="bg-white rounded-lg border border-gray-200 overflow-hidden hover:shadow-md transition-shadow">
+                <div 
+                  key={enquiry.id} 
+                  className="bg-white rounded-lg border border-gray-200 overflow-hidden hover:shadow-md transition-shadow cursor-pointer"
+                  onClick={() => navigate(`/user/enquiries/${enquiry.id}`)}
+                >
                   <div className="flex flex-col md:flex-row">
                     {/* Image */}
                     <div className="md:w-64 h-48 md:h-auto">

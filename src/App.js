@@ -16,6 +16,7 @@ import VendorSettings from './components/vendor/Settings/VendorSettings';
 import VendorAccount from './components/vendor/Account/VendorAccount';
 import VendorHelpCenter from './components/vendor/Help/VendorHelpCenter';
 import UserEnquiries from './components/user/UserEnquiries';
+import EnquiryDetail from './components/user/EnquiryDetail';
 import UserFavourites from './components/user/UserFavourites';
 import UserAccount from './components/user/UserAccount';
 import AdminDashboard from './components/admin/AdminDashboard';
@@ -63,6 +64,14 @@ function App() {
               element={
                 <RoleBasedRoute allowedRoles={[ROLES.CUSTOMER]}>
                   <UserEnquiries />
+                </RoleBasedRoute>
+              } 
+            />
+            <Route 
+              path="/user/enquiries/:enquiryId" 
+              element={
+                <RoleBasedRoute allowedRoles={[ROLES.CUSTOMER]}>
+                  <EnquiryDetail />
                 </RoleBasedRoute>
               } 
             />

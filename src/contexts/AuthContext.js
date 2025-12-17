@@ -95,7 +95,7 @@ export const AuthProvider = ({ children }) => {
       console.error('Login error:', error);
       return {
         success: false,
-        error: error.message || 'Login failed'
+        message: error.message || 'Login failed'
       };
     }
   };
@@ -126,7 +126,7 @@ export const AuthProvider = ({ children }) => {
       console.error('Register error:', error);
       return {
         success: false,
-        error: error.message || 'Registration failed'
+        message: error.message || 'Registration failed'
       };
     }
   };

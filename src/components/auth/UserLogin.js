@@ -37,7 +37,7 @@ const UserLogin = () => {
         const from = location.state?.from?.pathname || getDefaultRedirectPath(ROLES.CUSTOMER);
         navigate(from, { replace: true });
       } else {
-        setError(result.error || 'Login failed. Please check your credentials.');
+        setError(result.message || 'Login failed. Please check your credentials.');
       }
     } catch (err) {
       setError('An error occurred. Please try again.');

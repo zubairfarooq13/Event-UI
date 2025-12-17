@@ -37,7 +37,7 @@ const UserSignup = () => {
         // Redirect to user enquiries page
         navigate('/user/enquiries');
       } else {
-        setError(result.error || 'Signup failed. Please try again.');
+        setError(result.message || 'Signup failed. Please try again.');
       }
     } catch (err) {
       setError('An error occurred. Please try again.');

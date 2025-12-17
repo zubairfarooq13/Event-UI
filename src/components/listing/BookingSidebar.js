@@ -1,11 +1,17 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
+import { enquiryService } from '../../services';
 
 const BookingSidebar = ({ 
+  venue = {},
   host = {},
   responseRate = '99%',
   responseTime = '1 hour',
   onRequestBooking
 }) => {
+  const navigate = useNavigate();
+  const { user } = useAuth();
   const [selectedDate, setSelectedDate] = useState('');
   const [selectedTime, setSelectedTime] = useState('');
 
@@ -14,6 +20,84 @@ const BookingSidebar = ({
     initials: host.initials || 'JD',
     avatar: host.avatar,
     ...host
+  };
+
+  const handleRequestBooking = async () => {
+    if (!user) {
+      // Redirect to login if not authenticated
+      navigate('/login/user', { state: { from: window.location.pathname } });
+      return;
+    }
+
+    if (!selectedDate || !selectedTime) {
+      alert('Please select date and time');
+      return;
+    }
+
+    try {
+      // Time slot mapping
+      const timeSlotMap = {
+        'morning': '08:00 - 12:00',
+        'afternoon': '12:00 - 18:00',
+        'evening': '18:00 - 23:00',
+        'fullday': '08:00 - 23:00'
+      };
+
+      // Create enquiry via service using new API structure
+      const response = await enquiryService.createEnquiry({
+        vendor_id: venue.vendor_id || venue.vendorId,
+        space_id: venue.id,
+        subject: `Booking Request for ${venue.name || venue.venueName}`,
+        initial_message: `I would like to request a booking for ${selectedDate} during ${timeSlotMap[selectedTime] || selectedTime}. Please let me know if this date is available.`,
+        event_date: selectedDate,
+        guest_count: 10,
+        priority: 'normal'
+      });
+      
+      // Redirect to enquiry detail page with actual enquiry ID
+      navigate(`/user/enquiries/${response.data?.enquiry?.id || response.enquiry?.id || response.id}`);
+    } catch (error) {
+      console.error('Error creating enquiry:', error);
+      alert('Failed to create booking request. Please try again.');
+    }
+  };
+
+  const handleContactVenue = async () => {
+    if (!user) {
+      // Redirect to login if not authenticated
+      navigate('/login/user', { state: { from: window.location.pathname } });
+      return;
+    }
+
+    try {
+      // Time slot mapping
+      const timeSlotMap = {
+        'morning': '08:00 - 12:00',
+        'afternoon': '12:00 - 18:00',
+        'evening': '18:00 - 23:00',
+        'fullday': '08:00 - 23:00'
+      };
+
+      const eventDate = selectedDate || new Date().toISOString().split('T')[0];
+      const timeSlot = timeSlotMap[selectedTime] || selectedTime || '08:00 - 23:00';
+
+      // Create enquiry via service for contact using new API structure
+      const response = await enquiryService.createEnquiry({
+        vendor_id: venue.vendor_id || venue.vendorId,
+        space_id: venue.id,
+        subject: `Enquiry for ${venue.name || venue.venueName}`,
+        initial_message: `Hello, I'm interested in ${venue.name || venue.venueName}${selectedDate ? ` for ${eventDate}` : ''}${selectedTime ? ` during ${timeSlot}` : ''}. Could you please provide more information?`,
+        event_date: selectedDate || undefined,
+        guest_count: 10,
+        priority: 'normal'
+      });
+      
+      // Redirect to enquiry detail page with actual enquiry ID
+      navigate(`/user/enquiries/${response.data?.enquiry?.id || response.enquiry?.id || response.id}`);
+    } catch (error) {
+      console.error('Error creating enquiry:', error);
+      alert('Failed to contact venue. Please try again.');
+    }
   };
 
   return (
@@ -79,7 +163,7 @@ const BookingSidebar = ({
 
         {/* Request to Book Button */}
         <button
-          onClick={onRequestBooking}
+          onClick={handleRequestBooking}
           className="w-full bg-teal-600 text-white py-3 rounded-lg hover:bg-teal-700 transition-colors font-semibold mb-3"
         >
           Request to book
@@ -87,6 +171,7 @@ const BookingSidebar = ({
 
         {/* Contact Button */}
         <button
+          onClick={handleContactVenue}
           className="w-full border border-teal-600 text-teal-600 py-3 rounded-lg hover:bg-teal-50 transition-colors font-semibold"
         >
           Contact venue

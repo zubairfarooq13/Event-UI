@@ -543,9 +543,10 @@ The venue features beautiful fabric draping, comfortable seating arrangements, a
           {/* Right Column - Booking Sidebar */}
           <div className="lg:col-span-1">
             <BookingSidebar 
+              venue={venue}
               host={venue.host}
-              responseRate={venue.host.responseRate}
-              responseTime={venue.host.responseTime}
+              responseRate={venue.host?.responseRate}
+              responseTime={venue.host?.responseTime}
               onRequestBooking={handleRequestBooking}
             />
           </div>
