@@ -1,27 +1,26 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import UserHeader from '../common/headers/UserHeader';
-import { FaArrowLeft, FaCalendar, FaClock, FaUsers, FaPaperclip, FaPaperPlane, FaStar, FaPhone, FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
+import EnquiryChat from '../common/chat/EnquiryChat';
+import { FaArrowLeft, FaCalendar, FaClock, FaUsers, FaStar, FaPhone, FaCheckCircle } from 'react-icons/fa';
 import { enquiryService } from '../../services';
 
 const EnquiryDetail = () => {
   const { enquiryId } = useParams();
   const navigate = useNavigate();
-  const messagesEndRef = useRef(null);
-  const fileInputRef = useRef(null);
-  const [message, setMessage] = useState('');
-  const [messages, setMessages] = useState([]);
   const [enquiry, setEnquiry] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [uploadingFile, setUploadingFile] = useState(false);
 
   useEffect(() => {
     // Load enquiry data from API
     const loadEnquiry = async () => {
       try {
         // Fetch enquiry details using service
-        const enquiryData = await enquiryService.getEnquiryById(enquiryId);
+        const response = await enquiryService.getEnquiryById(enquiryId);
 
+        // Extract enquiry data from response structure
+        const enquiryData = response.data?.enquiry || response.enquiry || response.data || response;
+        
         // Format date for display
         const formattedDate = new Date(enquiryData.event_date).toLocaleDateString('en-GB', {
           weekday: 'long',
@@ -61,38 +60,6 @@ const EnquiryDetail = () => {
           }
         });
 
-        // Fetch messages using service
-        try {
-          const messagesData = await enquiryService.getEnquiryMessages(enquiryId);
-          
-          // Transform messages to match component format
-          const formattedMessages = messagesData.messages?.map(msg => ({
-            id: msg.id,
-            sender: msg.sender_type, // 'user' or 'vendor'
-            senderName: msg.sender_name,
-            text: msg.message,
-            timestamp: new Date(msg.created_at).toLocaleString('en-GB', {
-              day: '2-digit',
-              month: '2-digit',
-              year: 'numeric',
-              hour: '2-digit',
-              minute: '2-digit'
-            }),
-            avatar: msg.sender_avatar || null,
-            attachments: msg.attachments || []
-          })) || [];
-
-          setMessages(formattedMessages);
-
-          // Mark messages as read
-          if (formattedMessages.length > 0) {
-            enquiryService.markMessagesAsRead(enquiryId)
-              .catch(err => console.error('Error marking messages as read:', err));
-          }
-        } catch (msgError) {
-          console.error('Error loading messages:', msgError);
-        }
-
         setLoading(false);
       } catch (error) {
         console.error('Error loading enquiry:', error);
@@ -102,46 +69,6 @@ const EnquiryDetail = () => {
     };
 
     loadEnquiry();
-
-    // Poll for new messages every 5 seconds
-    const pollInterval = setInterval(async () => {
-      try {
-        const messagesData = await enquiryService.getEnquiryMessages(enquiryId);
-          
-        const formattedMessages = messagesData.messages?.map(msg => ({
-          id: msg.id,
-          sender: msg.sender_type,
-          senderName: msg.sender_name,
-          text: msg.message,
-          timestamp: new Date(msg.created_at).toLocaleString('en-GB', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-          }),
-          avatar: msg.sender_avatar || null,
-          attachments: msg.attachments || []
-        })) || [];
-
-        // Only update if there are new messages
-        setMessages(prevMessages => {
-          if (JSON.stringify(prevMessages) !== JSON.stringify(formattedMessages)) {
-            // Mark new messages as read
-            enquiryService.markMessagesAsRead(enquiryId)
-              .catch(err => console.error('Error marking messages as read:', err));
-            
-            return formattedMessages;
-          }
-          return prevMessages;
-        });
-      } catch (error) {
-        console.error('Error polling messages:', error);
-      }
-    }, 5000);
-
-    // Cleanup interval on unmount
-    return () => clearInterval(pollInterval);
   }, [enquiryId, navigate]);
 
   if (loading || !enquiry) {
@@ -154,39 +81,6 @@ const EnquiryDetail = () => {
       </div>
     );
   }
-
-  const handleSendMessage = async (e, customMessage = null) => {
-    e.preventDefault();
-    const messageText = customMessage || message.trim();
-    if (messageText) {
-      try {
-        const data = await enquiryService.sendMessage(enquiryId, messageText);
-
-        // Add new message to UI
-        const newMessage = {
-          id: data.message_id || data.id,
-          sender: 'user',
-          senderName: 'You',
-          text: messageText,
-          timestamp: new Date().toLocaleString('en-GB', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-          }),
-          avatar: null,
-          attachments: []
-        };
-        
-        setMessages([...messages, newMessage]);
-        if (!customMessage) setMessage('');
-      } catch (error) {
-        console.error('Error sending message:', error);
-        alert('Failed to send message. Please try again.');
-      }
-    }
-  };
 
   const handleRequestToBook = async () => {
     try {
@@ -207,7 +101,6 @@ const EnquiryDetail = () => {
   };
 
   const handleDecline = async () => {
-    // Handle decline
     if (window.confirm('Are you sure you want to decline this offer?')) {
       try {
         await enquiryService.updateEnquiryStatus(enquiryId, 'declined');
@@ -224,30 +117,6 @@ const EnquiryDetail = () => {
         console.error('Error declining offer:', error);
         alert('Failed to decline offer. Please try again.');
       }
-    }
-  };
-
-  const handleFileUpload = async (event) => {
-    const file = event.target.files[0];
-    if (!file) return;
-
-    setUploadingFile(true);
-    try {
-      const data = await enquiryService.uploadAttachment(enquiryId, file);
-
-      // Send message with attachment info
-      const attachmentMessage = `📎 ${file.name}`;
-      await handleSendMessage({ preventDefault: () => {} }, attachmentMessage);
-
-      // Reset file input
-      if (fileInputRef.current) {
-        fileInputRef.current.value = '';
-      }
-    } catch (error) {
-      console.error('Error uploading file:', error);
-      alert('Failed to upload file. Please try again.');
-    } finally {
-      setUploadingFile(false);
     }
   };
 
@@ -298,126 +167,43 @@ const EnquiryDetail = () => {
                 </div>
               )}
 
-              {/* Chat Container with messages and input */}
-              <div className="bg-white rounded-lg border border-gray-200 flex-1 flex flex-col min-h-0 overflow-hidden">
-                {/* Messages Container with scroll */}
-                <div className="flex-1 overflow-y-auto" style={{ maxHeight: 'calc(100vh - 300px)' }}>
-                  <div className="p-6 space-y-4 min-h-full">
-                  {/* Initial Enquiry Summary */}
-                  <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                    <div className="flex items-start">
-                      <div className="w-8 h-8 bg-teal-100 rounded-full flex items-center justify-center mr-3 flex-shrink-0">
-                        <span className="text-teal-600 text-sm">📋</span>
-                      </div>
-                      <div className="flex-1">
-                        <p className="text-sm font-medium text-gray-900 mb-2">
-                          Zubair Farooq sent an enquiry
-                        </p>
-                        <div className="text-sm text-gray-600 space-y-1">
-                          <div className="flex items-center">
-                            <FaUsers className="mr-2 text-gray-400" size={12} />
-                            {enquiry.event.type} • {enquiry.event.guests} guests • {enquiry.event.layout}
-                          </div>
-                          <div className="flex items-center">
-                            <FaCalendar className="mr-2 text-gray-400" size={12} />
-                            {enquiry.venue.name} at {enquiry.venue.location}
-                          </div>
-                          <div className="flex items-center">
-                            <FaClock className="mr-2 text-gray-400" size={12} />
-                            {enquiry.event.date} at {enquiry.event.time}
-                          </div>
-                          <div className="flex items-center">
-                            <FaCheckCircle className="mr-2 text-gray-400" size={12} />
-                            Catering {enquiry.event.catering.toLowerCase()}
-                          </div>
+              {/* Independent Chat Component */}
+              <EnquiryChat 
+                enquiryId={enquiryId}
+                userType="customer"
+                enableFileUpload={true}
+                className="flex-1"
+                enquirySummary={
+                  <div className="flex items-start">
+                    <div className="w-8 h-8 bg-teal-100 rounded-full flex items-center justify-center mr-3 flex-shrink-0">
+                      <span className="text-teal-600 text-sm">📋</span>
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-gray-900 mb-2">
+                        Zubair Farooq sent an enquiry
+                      </p>
+                      <div className="text-sm text-gray-600 space-y-1">
+                        <div className="flex items-center">
+                          <FaUsers className="mr-2 text-gray-400" size={12} />
+                          {enquiry.event.type} • {enquiry.event.guests} guests • {enquiry.event.layout}
+                        </div>
+                        <div className="flex items-center">
+                          <FaCalendar className="mr-2 text-gray-400" size={12} />
+                          {enquiry.venue.name} at {enquiry.venue.location}
+                        </div>
+                        <div className="flex items-center">
+                          <FaClock className="mr-2 text-gray-400" size={12} />
+                          {enquiry.event.date} at {enquiry.event.time}
+                        </div>
+                        <div className="flex items-center">
+                          <FaCheckCircle className="mr-2 text-gray-400" size={12} />
+                          Catering {enquiry.event.catering.toLowerCase()}
                         </div>
                       </div>
                     </div>
                   </div>
-
-                  {/* Chat Messages */}
-                  {messages.map((msg) => (
-                    <div
-                      key={msg.id}
-                      className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}
-                    >
-                      <div className={`max-w-[80%] ${msg.sender === 'user' ? 'order-2' : 'order-1'}`}>
-                        {msg.sender === 'vendor' && (
-                          <div className="flex items-center mb-2">
-                            <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center mr-2">
-                              <span className="text-gray-600 text-sm font-medium">
-                                {msg.senderName.charAt(0)}
-                              </span>
-                            </div>
-                            <span className="text-sm font-medium text-gray-900">
-                              {msg.senderName}
-                            </span>
-                          </div>
-                        )}
-                        <div
-                          className={`rounded-lg px-4 py-3 ${
-                            msg.sender === 'user'
-                              ? 'bg-teal-600 text-white'
-                              : 'bg-gray-100 text-gray-900'
-                          }`}
-                        >
-                          <p className="text-sm whitespace-pre-line">{msg.text}</p>
-                        </div>
-                        <p className="text-xs text-gray-500 mt-1">
-                          {msg.timestamp}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                  <div ref={messagesEndRef} />
-                  </div>
-                </div>
-
-                {/* Message Input - Static at bottom */}
-                <div className="border-t border-gray-200 p-4 flex-shrink-0 bg-white">
-                  <form onSubmit={handleSendMessage} className="flex items-end gap-2">
-                    <input
-                      ref={fileInputRef}
-                      type="file"
-                      onChange={handleFileUpload}
-                      className="hidden"
-                      accept="image/*,.pdf,.doc,.docx"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => fileInputRef.current?.click()}
-                      disabled={uploadingFile}
-                      className="p-3 text-gray-400 hover:text-gray-600 transition-colors disabled:opacity-50"
-                      title="Attach file"
-                    >
-                      <FaPaperclip size={20} />
-                    </button>
-                    <textarea
-                      value={message}
-                      onChange={(e) => setMessage(e.target.value)}
-                      placeholder="Type a message"
-                      rows="2"
-                      className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent resize-none"
-                      onKeyPress={(e) => {
-                        if (e.key === 'Enter' && !e.shiftKey) {
-                          e.preventDefault();
-                          handleSendMessage(e);
-                        }
-                      }}
-                    />
-                    <button
-                      type="submit"
-                      disabled={!message.trim()}
-                      className="p-3 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      <FaPaperPlane size={18} />
-                    </button>
-                  </form>
-                  {uploadingFile && (
-                    <p className="text-xs text-gray-500 mt-2">Uploading file...</p>
-                  )}
-                </div>
-              </div>
+                }
+              />
             </div>
 
             {/* Right Column - Venue Details */}
